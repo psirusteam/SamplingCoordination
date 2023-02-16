@@ -4,17 +4,17 @@
 \alias{genera_alea}
 \title{Generation of random samples.}
 \usage{
-genera_alea(N, semilla, xk = NULL, indica_pareto = F, n = NULL)
+genera_alea(N, seed, xk = NULL, pereto_method = F, n = NULL)
 }
 \arguments{
 \item{N:}{number of random numbers to generate}
 
-\item{semilla:}{seed for the random number generation}
+\item{seed:}{seed for the random number generation}
 
 \item{xk:}{vector of weights for PPS or Pareto distributions. If NULL, the 
 function will not generate PPS or Pareto random numbers.}
 
-\item{indica_pareto:}{a boolean indicating whether to generate Pareto random 
+\item{pereto_method:}{a boolean indicating whether to generate Pareto random 
 numbers (TRUE) or not (FALSE)}
 
 \item{n:}{a parameter for the Pareto distribution. If NULL, the function will
@@ -30,10 +30,10 @@ random numbers if the corresponding parameters are specified.
 }
 \examples{
 #We want 5 random numbers:
-genera_alea(N = 5, semilla = 12345)
+genera_alea(N = 5, seed = 12345)
 # In case there is an auxiliary variable, the program returns the Pareto random numbers:
-genera_alea(N = 5, semilla = 12345, xk = c(50, 40, 70, 30, 90))
-genera_alea(N = 5, semilla = 12345, xk = c(50, 40, 70, 30, 90), indica_pareto = T, n = 3)
+genera_alea(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90))
+genera_alea(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90), pereto_method = T, n = 3)
 }
 \author{
 Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, 
