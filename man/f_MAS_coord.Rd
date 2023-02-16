@@ -7,15 +7,15 @@
 f_MAS_coord(coordination = "negative", Q = 2, N = 10, vctr_n, seed = 12345)
 }
 \arguments{
-\item{coordinacion:}{a character string, either "negative" or "positive", indicating the type of coordination (default is "negativa")}
+\item{coordination}{a character string, either "negative" or "positive", indicating the type of coordination (default is "negativa")}
 
-\item{Q:}{an integer indicating the number of categories (default is 2)}
+\item{Q}{an integer indicating the number of categories (default is 2)}
 
-\item{N:}{an integer indicating the population size (default is 10)}
+\item{N}{an integer indicating the population size (default is 10)}
 
-\item{vctr_n:}{a vector containing the number of units to be selected from each category}
+\item{vctr_n}{a vector containing the number of units to be selected from each category}
 
-\item{seed:}{an integer value that sets the seed for the random number generator (default is 12345)}
+\item{seed}{an integer value that sets the seed for the random number generator (default is 12345)}
 }
 \value{
 The function returns a data frame with the following columns:
@@ -26,20 +26,18 @@ The function returns a data frame with the following columns:
 }
 }
 \description{
-The function f_MAS_coord generates data that follows the Modified Atkinson-Schönberg (MAS)
-coordinated sampling scheme. It produces a data frame with information about
-the sample selection from a population of size N using Q categories. The coordination
-can be either negative or positive. The function uses the ´genera_alea´ 
-function to generate the random numbers.
+The function f_MAS_coord generates data that follows the Modified Atkinson-Schönberg (MAS) coordinated sampling scheme. It produces a data frame with information about the sample selection from a population of size N using Q categories. The coordination can be either negative or positive. The function uses the genera_alea function to generate the random numbers.
 }
 \examples{
-test_masCoord <- f_MAS_coord(coordinacion = "negative",
+f_MAS_coord(coordination = "negative",
                               Q = 3, N = 100, vctr_n = c(10, 20, 12),
                               seed = 12345)
-                              
+
+                                                            
+}
+\seealso{
+\code{\link{genera_alea}}
 }
 \author{
-Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, 
-Jose Fernando Zea Castro <jfzeac@unal.edu.co>,
-Stalyn Yasid Guerrero Gomez <syguerrerog@unal.edu.co>
+Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
 }

@@ -4,39 +4,32 @@
 \alias{genera_alea}
 \title{Generation of random samples.}
 \usage{
-genera_alea(N, seed, xk = NULL, pereto_method = F, n = NULL)
+genera_alea(N, seed, xk = NULL, pereto_method = FALSE, n = NULL)
 }
 \arguments{
-\item{N:}{number of random numbers to generate}
+\item{N}{number of random numbers to generate}
 
-\item{seed:}{seed for the random number generation}
+\item{seed}{seed for the random number generation}
 
-\item{xk:}{vector of weights for PPS or Pareto distributions. If NULL, the 
-function will not generate PPS or Pareto random numbers.}
+\item{xk}{vector of weights for PPS or Pareto distributions. If NULL, the function will not generate PPS or Pareto random numbers.}
 
-\item{pereto_method:}{a boolean indicating whether to generate Pareto random 
-numbers (TRUE) or not (FALSE)}
+\item{pereto_method}{a boolean indicating whether to generate Pareto random numbers (TRUE) or not (FALSE)}
 
-\item{n:}{a parameter for the Pareto distribution. If NULL, the function will
-not generate Pareto random numbers.}
+\item{n}{a parameter for the Pareto distribution. If NULL, the function will not generate Pareto random numbers.}
 }
 \value{
 The random number generation returns the permanent and placed random numbers.
 }
 \description{
-This function generates random numbers using two different methods: Permutation 
-and "colocated" random numbers. Additionally, it can generate Pareto and PPS 
-random numbers if the corresponding parameters are specified.
+This function generates random numbers using two different methods: Permutation and "colocated" random numbers. Additionally, it can generate Pareto and PPS random numbers if the corresponding parameters are specified.
 }
 \examples{
 #We want 5 random numbers:
 genera_alea(N = 5, seed = 12345)
 # In case there is an auxiliary variable, the program returns the Pareto random numbers:
 genera_alea(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90))
-genera_alea(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90), pereto_method = T, n = 3)
+genera_alea(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90), pereto_method = TRUE, n = 3)
 }
 \author{
-Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, 
-Jose Fernando Zea Castro <jfzeac@unal.edu.co>,
-Stalyn Yasid Guerrero Gomez <syguerrerog@unal.edu.co>
+Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
 }

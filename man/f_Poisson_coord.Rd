@@ -36,13 +36,15 @@ A data frame with columns:
 This function generates a correlated Poisson process based on the given parameters.
 }
 \examples{
-f_Poisson_coord(coordinacion = "positive", Q = 2, N = 10, vctr_n = c(3,3), 
+f_Poisson_coord(coordination = "positive", Q = 2, N = 10, vctr_n = c(3,3), 
                xk = c(198, 173, 184, 179, 170, 190, 162, 159, 166, 190),
-                               n = 3,seed = 12345)
+                              seed = 12345)
+
 
 }
+\seealso{
+\code{\link{genera_alea}}
+}
 \author{
-Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, 
-Jose Fernando Zea Castro <jfzeac@unal.edu.co>,
-Stalyn Yasid Guerrero Gomez <syguerrerog@unal.edu.co>
+Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
 }

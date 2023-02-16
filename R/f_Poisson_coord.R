@@ -1,10 +1,20 @@
+#' @import dplyr 
+#' @import stats 
+#' @import parallel
+#' @import magrittr
+#' @importFrom dplyr filter
+#' @importFrom dplyr lag
+#' @export
+#' 
 #' @title
 #' Generate a correlated Poisson process
 #' @description 
 #' This function generates a correlated Poisson process based on the given parameters.
-#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, 
-#' Jose Fernando Zea Castro <jfzeac@unal.edu.co>,
-#' Stalyn Yasid Guerrero Gomez <syguerrerog@unal.edu.co>  
+#' @return A data frame with columns:
+#' \item{unit}{An integer vector representing the unit ID.}
+#' \item{xi_pps}{A numeric vector representing the generated random numbers.}
+#' \item{s1, s2, ..., sQ}{A binary vector representing the points in each quantile.}
+#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>   
 #' @param coordination A string specifying the type of coordination to be used: "negative" or "positive". Default is "negative".
 #' @param Q An integer specifying the number of quantiles to be used. Default is 2.
 #' @param N An integer specifying the number of units. Default is 10.
@@ -12,20 +22,12 @@
 #' @param xk A numeric scalar specifying the Poisson parameter.
 #' @param seed An integer specifying the seed for the random number generator. Default is 12345.
 #' 
-#' @return A data frame with columns:
-#' \item{unit}{An integer vector representing the unit ID.}
-#' \item{xi_pps}{A numeric vector representing the generated random numbers.}
-#' \item{s1, s2, ..., sQ}{A binary vector representing the points in each quantile.}
-#' 
+#' @seealso \code{\link{genera_alea}}
 #' @examples
-#' f_Poisson_coord(coordinacion = "positive", Q = 2, N = 10, vctr_n = c(3,3), 
+#' f_Poisson_coord(coordination = "positive", Q = 2, N = 10, vctr_n = c(3,3), 
 #'                xk = c(198, 173, 184, 179, 170, 190, 162, 159, 166, 190),
-#'                                n = 3,seed = 12345)
+#'                               seed = 12345)
 #' 
-#' @importFrom dplyr arrange mutate
-#' @importFrom stats rpois
-#' @importFrom parallel mclapply
-#' @importFrom magrittr %>%
 #' 
 
 f_Poisson_coord <- function(coordination = "negative", Q = 2, N = 10, vctr_n,

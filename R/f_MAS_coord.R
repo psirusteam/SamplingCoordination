@@ -1,23 +1,14 @@
 #' @import dplyr
 #' @import stats
+#' @import TeachingSampling
+#' @importFrom dplyr filter
+#' @importFrom dplyr lag
 #' @export
+#' 
 #' @title
 #' Coordinated Simple Random Sampling
 #' @description 
-#' The function f_MAS_coord generates data that follows the Modified Atkinson-Schönberg (MAS)
-#' coordinated sampling scheme. It produces a data frame with information about
-#' the sample selection from a population of size N using Q categories. The coordination
-#' can be either negative or positive. The function uses the ´genera_alea´ 
-#' function to generate the random numbers.
-#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, 
-#' Jose Fernando Zea Castro <jfzeac@unal.edu.co>,
-#' Stalyn Yasid Guerrero Gomez <syguerrerog@unal.edu.co> 
-#' @param coordinacion: a character string, either "negative" or "positive", indicating the type of coordination (default is "negativa")
-#' @param Q: an integer indicating the number of categories (default is 2)
-#' @param N: an integer indicating the population size (default is 10)
-#' @param vctr_n: a vector containing the number of units to be selected from each category
-#' @param seed: an integer value that sets the seed for the random number generator (default is 12345)
-
+#' The function f_MAS_coord generates data that follows the Modified Atkinson-Schönberg (MAS) coordinated sampling scheme. It produces a data frame with information about the sample selection from a population of size N using Q categories. The coordination can be either negative or positive. The function uses the genera_alea function to generate the random numbers.
 #' @return 
 #' The function returns a data frame with the following columns:
 #' \itemize{
@@ -25,15 +16,24 @@
 #' \item xi_P: the random number generated from the genera_alea function
 #' \item s1 to sQ: binary variables indicating whether the unit is selected or not, for each category Q.
 #' }
+#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
+#' @param coordination a character string, either "negative" or "positive", indicating the type of coordination (default is "negativa")
+#' @param Q an integer indicating the number of categories (default is 2)
+#' @param N an integer indicating the population size (default is 10)
+#' @param vctr_n a vector containing the number of units to be selected from each category
+#' @param seed an integer value that sets the seed for the random number generator (default is 12345)
+#'
+#' @seealso \code{\link{genera_alea}}
 #' @examples 
-#' test_masCoord <- f_MAS_coord(coordinacion = "negative",
+#' f_MAS_coord(coordination = "negative",
 #'                               Q = 3, N = 100, vctr_n = c(10, 20, 12),
 #'                               seed = 12345)
-#'                               
+#' 
+#'                                                             
 f_MAS_coord <- function(coordination = "negative", Q = 2, N = 10, vctr_n, 
                         seed = 12345){
   
-  xi_P <- genera_alea(N = N, seed = seed,)$Xi_Perman
+  xi_P <- genera_alea(N = N, seed = seed)$Xi_Perman
   
   
   if(coordination == "negative"){
