@@ -1,8 +1,3 @@
-#' @import dplyr 
-#' @import stats 
-#' @import parallel
-#' @importFrom dplyr filter
-#' @importFrom dplyr lag
 #' @export
 #' 
 #' @title

@@ -1,9 +1,10 @@
-#' @import dplyr
-#' @import stats
-#' @importFrom dplyr filter
-#' @importFrom dplyr lag
 #' @export
-
+#' @importFrom stats runif
+#' @importFrom dplyr arrange
+#' @importFrom dplyr mutate
+#' @importFrom magrittr %>%
+#' @importFrom dplyr desc
+#' 
 #' @title
 #' Generation of random samples.
 #' @description 

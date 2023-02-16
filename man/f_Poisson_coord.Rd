@@ -36,7 +36,7 @@ A data frame with columns:
 This function generates a correlated Poisson process based on the given parameters.
 }
 \examples{
-f_Poisson_coord(coordination = "positive", Q = 2, N = 10, vctr_n = c(3,3), 
+f_Poisson_coord(coordination = "positive", Q = 2, N = 10, vctr_n = c(3,3),
                xk = c(198, 173, 184, 179, 170, 190, 162, 159, 166, 190),
                               seed = 12345)
 
