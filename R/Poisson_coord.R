@@ -11,31 +11,31 @@
 #' \item{xi_pps}{A numeric vector representing the generated random numbers.}
 #' \item{s1, s2, ..., sQ}{A binary vector representing the points in each quantile.}
 #' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
-#' @param coordination A string specifying the type of coordination to be used: "negative" or "positive". Default is "negative".
+#' @param type A string specifying the type of type to be used: "negative" or "positive". Default is "negative".
 #' @param Q An integer specifying the number of quantiles to be used. Default is 2.
 #' @param N An integer specifying the number of units. Default is 10.
 #' @param vctr_n A numeric vector of length Q specifying the number of points in each quantile.
 #' @param xk A numeric scalar specifying the Poisson parameter.
 #' @param seed An integer specifying the seed for the random number generator. Default is 12345.
 #'
-#' @seealso \code{\link{genera_alea}}
+#' @seealso \code{\link{Generate_random}}
 #' @examples
-#' f_Poisson_coord(coordination = "positive", Q = 2, N = 10, vctr_n = c(3,3),
+#' Poisson_coord(type = "positive", Q = 2, N = 10, vctr_n = c(3,3),
 #'                xk = c(198, 173, 184, 179, 170, 190, 162, 159, 166, 190),
 #'                               seed = 12345)
 #'
 #'
 
-f_Poisson_coord <-
-  function(coordination = "negative",
+Poisson_coord <-
+  function(type = "negative",
            Q = 2,
            N = 10,
            vctr_n,
            xk,
            seed = 12345) {
-    xi_pps <- genera_alea(N = N, seed = seed,  xk)$Xi_pipt
+    xi_pps <- Generate_random(N = N, seed = seed,  xk)$Xi_pipt
     
-    if (coordination == "negative") {
+    if (type == "negative") {
       vctr_a <- rep(NA_real_, Q)
       vctr_a[1] <- 0
       
@@ -55,7 +55,7 @@ f_Poisson_coord <-
       }
     }
     
-    if (coordination == "positive") {
+    if (type == "positive") {
       vctr_a <- rep(NA_real_, Q)
       vctr_a[1] <- 0
       

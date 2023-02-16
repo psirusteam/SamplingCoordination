@@ -15,21 +15,21 @@
 #' @param N number of random numbers to generate
 #' @param seed seed for the random number generation
 #' @param xk vector of weights for PPS or Pareto distributions. If NULL, the function will not generate PPS or Pareto random numbers.
-#' @param pereto_method a boolean indicating whether to generate Pareto random numbers (TRUE) or not (FALSE)
+#' @param Pareto a boolean indicating whether to generate Pareto random numbers (TRUE) or not (FALSE)
 #' @param n a parameter for the Pareto distribution. If NULL, the function will not generate Pareto random numbers.
 #' 
 #' @examples 
 #' #We want 5 random numbers:
-#' genera_alea(N = 5, seed = 12345)
+#' Generate_random(N = 5, seed = 12345)
 #' # In case there is an auxiliary variable, the program returns the Pareto random numbers:
-#' genera_alea(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90))
-#' genera_alea(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90), pereto_method = TRUE, n = 3)
+#' Generate_random(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90))
+#' Generate_random(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90), Pareto = TRUE, n = 3)
 
-genera_alea <-
+Generate_random <-
   function(N,
            seed,
            xk = NULL,
-           pereto_method = FALSE,
+           Pareto = FALSE,
            n = NULL) {
     set.seed(seed)
     Xi_Perman <- runif(N)
@@ -42,7 +42,7 @@ genera_alea <-
     salida <- list(Xi_Perman, Xi_Coloc)
     names(salida) <- c("Xi_Perman", "Xi_Coloc")
     
-    if (isTRUE(pereto_method) &
+    if (isTRUE(Pareto) &
         (!is.null(xk) &
          is.null(n)) |
         (is.null(xk) & !is.null(n)))
@@ -56,8 +56,7 @@ genera_alea <-
       pk = xk / sum(xk)
       Xi_ppt <-  Xi_Perman / (N * pk)
       
-      if (isTRUE(pereto_method)) {
-        # Pareto (si depende de n)
+      if (isTRUE(Pareto)) {
         pi_k <- TeachingSampling::PikPPS(n, x = xk)
         Xi_Pareto <-
           (Xi_Perman / (1 - Xi_Perman)) / (pi_k / (1 - pi_k))
@@ -65,7 +64,6 @@ genera_alea <-
         names(salida) <- c("Xi_Perman", "Xi_Coloc", "Xi_Pareto")
         
       } else {
-        #
         salida <- list(Xi_Perman, Xi_Coloc, Xi_ppt)
         names(salida) <- c("Xi_Perman", "Xi_Coloc", "Xi_pipt")
       }
