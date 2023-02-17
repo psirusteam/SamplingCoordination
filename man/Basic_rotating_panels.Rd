@@ -27,5 +27,5 @@ Basic_rotating_panels(A = 4, B = 0, C = 0)
 Basic_rotating_panels(A = 2, B = 0, C = 0)  
 }
 \author{
-Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
+Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
 }

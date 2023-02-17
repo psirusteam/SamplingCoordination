@@ -11,7 +11,7 @@
 #' This function generates random numbers using two different methods: Permutation and "colocated" random numbers. Additionally, it can generate Pareto and PPS random numbers if the corresponding parameters are specified.
 #' @return 
 #' The random number generation returns the permanent and placed random numbers.
-#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
+#' @author Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
 #' @param N number of random numbers to generate
 #' @param seed seed for the random number generation
 #' @param xk vector of weights for PPS or Pareto distributions. If NULL, the function will not generate PPS or Pareto random numbers.

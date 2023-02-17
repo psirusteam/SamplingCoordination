@@ -2,7 +2,7 @@
 #' 
 #' @title Basic Rotating Panels
 #' @description A function that generates a data frame with the configuration of rotating panels.
-#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
+#' @author Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
 #' @return A data frame with the configuration of rotating panels.
 #' @param A Integer value for the length of the active period
 #' @param B Integer value for the length of the inactive period

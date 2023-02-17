@@ -11,7 +11,7 @@
 #' \item xi_P: the random number generated from the Generate_random function
 #' \item s1 to sQ: binary variables indicating whether the unit is selected or not, for each category Q.
 #' }
-#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
+#' @author Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
 #' @param type a character string, either "negative" or "positive", indicating the type of type (default is "negativa")
 #' @param Q an integer indicating the number of categories (default is 2)
 #' @param N an integer indicating the population size (default is 10)

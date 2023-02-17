@@ -6,7 +6,7 @@
 #' @description 
 #' Generate a sequence of rotating panels according to the input parameters.
 #' @return a data frame with \code{period} rows and a column for each panel
-#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
+#' @author Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
 #' @param A An integer indicating the length of the first panel.
 #' @param B An integer indicating the length of the subsequent panels.
 #' @param C An integer indicating the number of repetitions of the panels.

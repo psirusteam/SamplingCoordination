@@ -3,9 +3,15 @@ Type: Package
 Title: Coodination of samples for complex rotative designs
 Version: 0.1.0
 Author: José Zea <jfzeac@unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, Stalyn Guerrero <syguerrerog@unal.edu.co>
-Maintainer:  Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>
+Maintainer: Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>
 Description: More about what it does (maybe more than one line). Use four spaces when indenting paragraphs within the Description.
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.2.3
-Depends: TeachingSampling, tidyverse, magrittr, dplyr
+Depends: 
+    TeachingSampling,
+    tidyverse,
+    magrittr,
+    dplyr,
+    R (>= 3.5)
+LazyData: true

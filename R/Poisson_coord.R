@@ -10,7 +10,7 @@
 #' \item{unit}{An integer vector representing the unit ID.}
 #' \item{xi_pps}{A numeric vector representing the generated random numbers.}
 #' \item{s1, s2, ..., sQ}{A binary vector representing the points in each quantile.}
-#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
+#' @author Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
 #' @param type A string specifying the type of type to be used: "negative" or "positive". Default is "negative".
 #' @param Q An integer specifying the number of quantiles to be used. Default is 2.
 #' @param N An integer specifying the number of units. Default is 10.

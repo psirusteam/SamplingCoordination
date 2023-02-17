@@ -5,7 +5,7 @@
 #' @description 
 #' This function generates a data frame with Pareto distributed random points. The points are ordered and assigned to Q clusters using a given type method.
 #' @return A data frame with the generated points and their corresponding clusters.
-#' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
+#' @author Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>  
 #' @param type A character string specifying the type method. The default is "negative".
 #' @param Q An integer specifying the number of clusters. The default is 2.
 #' @param N An integer specifying the number of points to generate. The default is 10.
