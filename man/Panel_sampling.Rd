@@ -48,20 +48,20 @@ This function assigns survey units (i.e., PSUs) to panels and samples a specifie
  PSUs and sample size by stratum.
 }
 \examples{
-data(PSUs)
-data(Pob_PSU)
+data(Data_PSU)
+data(Data_PSU_aggr)
 paneles <- cbind(Rotating_panels(A = 5, B = 0, C = 0, period = 13*4), 
 Rotating_panels(A = 5, B = 0, C = 0, period = 13*4, value_initial = "F"),
 Rotating_panels(A = 5, B = 0, C = 0, period = 13*4, value_initial = "K"))
 
 stratum <- "111"
 
-dt <- PSUs \%>\% filter(straum_id == stratum)
+dt <- Data_PSU \%>\% filter(straum_id == stratum)
 Num_PSU_strata <-
-  2 * Pob_PSU$N_PSU[Pob_PSU$straum_id ==  stratum]
+  2 * Data_PSU_aggr$N_PSU[Data_PSU_aggr$straum_id ==  stratum]
 
-sample_size_PSU_stratumo <-
-  Pob_PSU$n_PSU[Pob_PSU$straum_id ==  stratum]
+sample_size_PSU_stratum <-
+  Data_PSU_aggr$n_PSU[Data_PSU_aggr$straum_id ==  stratum]
 
 Panel_sampling(
   DF = dt,
@@ -69,14 +69,14 @@ Panel_sampling(
   PSU_column = "PSU_id",
   panels = paneles ,
   PSU_stratum_size = Num_PSU_strata,
-  PSU_stratum_sample_size = sample_size_PSU_stratumo,
+  PSU_stratum_sample_size = sample_size_PSU_stratum,
   seed = 12345
 ) 
 }
 \seealso{
-\code{\link{Number_PSU_panels}},
+\code{\link{Redistribution_PSU}},
 
-\code{\link{Sample_size_panels}}
+\code{\link{Redistribution_PSU_sample}}
 }
 \author{
 Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>

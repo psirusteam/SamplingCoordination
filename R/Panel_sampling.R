@@ -30,23 +30,23 @@
 #' @param PSU_stratum_size The number of PSUs in each stratum (in the population)
 #' @param PSU_stratum_sample_size The number of PSUs to select in each stratum-panel combination (in the sample)
 #' @param seed The seed to use for the random number generator
-#' @seealso \code{\link{Number_PSU_panels}}, 
-#' @seealso \code{\link{Sample_size_panels}}
+#' @seealso \code{\link{Redistribution_PSU}}, 
+#' @seealso \code{\link{Redistribution_PSU_sample}}
 #' @examples 
-#' data(PSUs)
-#' data(Pob_PSU)
+#' data(Data_PSU)
+#' data(Data_PSU_aggr)
 #' paneles <- cbind(Rotating_panels(A = 5, B = 0, C = 0, period = 13*4), 
 #' Rotating_panels(A = 5, B = 0, C = 0, period = 13*4, value_initial = "F"),
 #' Rotating_panels(A = 5, B = 0, C = 0, period = 13*4, value_initial = "K"))
 #' 
 #' stratum <- "111"
 #' 
-#' dt <- PSUs %>% filter(straum_id == stratum)
+#' dt <- Data_PSU %>% filter(straum_id == stratum)
 #' Num_PSU_strata <-
-#'   2 * Pob_PSU$N_PSU[Pob_PSU$straum_id ==  stratum]
+#'   2 * Data_PSU_aggr$N_PSU[Data_PSU_aggr$straum_id ==  stratum]
 #' 
-#' sample_size_PSU_stratumo <-
-#'   Pob_PSU$n_PSU[Pob_PSU$straum_id ==  stratum]
+#' sample_size_PSU_stratum <-
+#'   Data_PSU_aggr$n_PSU[Data_PSU_aggr$straum_id ==  stratum]
 #' 
 #' Panel_sampling(
 #'   DF = dt,
@@ -54,7 +54,7 @@
 #'   PSU_column = "PSU_id",
 #'   panels = paneles ,
 #'   PSU_stratum_size = Num_PSU_strata,
-#'   PSU_stratum_sample_size = sample_size_PSU_stratumo,
+#'   PSU_stratum_sample_size = sample_size_PSU_stratum,
 #'   seed = 12345
 #' ) 
 
@@ -110,7 +110,7 @@ Panel_sampling <- function(DF,
   set.seed(seed)
   DF$random <- runif(n = nrow(DF))
   DF <- arrange(DF, random)
-  info <- Number_PSU_panels(PSU_stratum_size, total_num_panels)
+  info <- Redistribution_PSU(PSU_stratum_size, total_num_panels)
   info <- c(info, "Size_PSU_stratum" = nrow(DF))
   
   
@@ -135,7 +135,7 @@ Panel_sampling <- function(DF,
   
   
   info_mue <-
-    Sample_size_panels(PSU_stratum_sample_size, num_panels_period)
+    Redistribution_PSU_sample(PSU_stratum_sample_size, num_panels_period)
   info_mue <-
     c(info_mue, "PSU_stratum_sample_size" = PSU_stratum_sample_size)
   

@@ -1,7 +1,7 @@
 #' @export
 #' 
 #' @title
-#' Sample size calculation for each panel
+#' Redistribution of the PSU sample
 #' @description
 #' This function calculates the sample size of each panel given the sample size of the PSU stratum and the number of panels per PSU.
 #' @return A vector with the following elements:
@@ -12,16 +12,16 @@
 #' \item{Num_PSU_large_panels}{Number of PSUs in large groups.}
 #' \item{Num_PSU_normal_panels}{Number of PSUs in normal groups.}
 #' }
-#' @author Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>   
+#' @author Jose Fernando Zea Castro <jfzeac@unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog@unal.edu.co>   
 #' @param sample_size_PSU_stratum Sample size of the PSU stratum.
 #' @param Num_panels_period Number of panels per PSU.
 #'
 #' @examples
-#' Sample_size_panels(sample_size_PSU_stratum = 400, Num_panels_period = 4)
+#' Redistribution_PSU_sample(sample_size_PSU_stratum = 400, Num_panels_period = 4)
 #'
 #' @export
 #' 
-Sample_size_panels <-
+Redistribution_PSU_sample <-
   function(sample_size_PSU_stratum,
            Num_panels_period) {
     Num_PSU_normal_panels <-

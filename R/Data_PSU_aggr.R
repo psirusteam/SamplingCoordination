@@ -9,4 +9,4 @@
 #'   \item{N_PSU}{PSU count in the population}
 #'   \item{n_PSU}{Number of PSUs to select in the sample}
 #' }
-"Pob_PSU"
+"Data_PSU_aggr"

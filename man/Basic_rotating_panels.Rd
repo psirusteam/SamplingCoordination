@@ -21,7 +21,7 @@ A function that generates a data frame with the configuration of rotating panels
 }
 \examples{
 Basic_rotating_panels(A = 4, B = 8, C = 4) 
-Basic_rotating_panels(A = 2, B = 2, C = 2) 
+Basic_rotating_panels(A = 2, B = 2, C = 4) 
 Basic_rotating_panels(A = 5, B = 0, C = 0)  
 Basic_rotating_panels(A = 4, B = 0, C = 0) 
 Basic_rotating_panels(A = 2, B = 0, C = 0)  

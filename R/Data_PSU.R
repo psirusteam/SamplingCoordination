@@ -7,4 +7,4 @@
 #'   \item{straum_id}{Stratum identifier}
 #'   \item{PSU_id}{PSU identifier}
 #' }
-"PSUs"
+"Data_PSU"

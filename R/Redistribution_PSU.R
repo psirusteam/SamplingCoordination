@@ -16,9 +16,9 @@
 #' @param total_num_panels Numeric scalar with the total number of panels.
 #' 
 #' @examples
-#' Number_PSU_panels(50, 10)
+#' Redistribution_PSU(num_PSU_strata = 50, total_num_panels = 10)
 #' 
-Number_PSU_panels <-
+Redistribution_PSU <-
   function(num_PSU_strata, total_num_panels) {
     PSU_num_normal_panels <-
       floor((num_PSU_strata / total_num_panels))
