@@ -21,12 +21,15 @@
 #' @param keep_steps Logical. If `TRUE`, returns all intermediate datasets and the final
 #' dataset in a list. If `FALSE`, returns only the final dataset.
 #' @param show_diagnostics Logical. If `TRUE`, prints diagnostics for each stage.
+#' @param step_by_step Logical. If `TRUE`, pauses after each stage until pressing Enter.
+#' @param view_steps Logical. If `TRUE`, opens each stage dataset with `utils::View()`
+#' in interactive sessions.
 #'
 #' @return
 #' A data frame with adjusted weights for responding eligible households (`ER`) including:
 #' `d_1k`, `a_b`, `d_2k`, `d_3k`, `I_k`, `D_k`, `phi_k`, and `d_4k`.
 #' If `keep_steps = TRUE`, returns a list with `step_a`, `step_b`, `step_c`, `step_d`,
-#' and `final`.
+#' `summary_a`, `summary_b`, `summary_c`, `summary_d`, and `final`.
 #'
 
 #' @author Yury Vanessa Ochoa
@@ -52,7 +55,8 @@
 #'   pi_second_stage = pi2,
 #'   pi_first_stage = pi1,
 #'   keep_steps = FALSE,
-#'   show_diagnostics = FALSE
+#'   show_diagnostics = TRUE,
+#'   step_by_step = FALSE
 #' )
 Adjust_fex_cepal <- function(data,
                              household_id,
@@ -63,7 +67,9 @@ Adjust_fex_cepal <- function(data,
                              pi_second_stage,
                              pi_first_stage,
                              keep_steps = TRUE,
-                             show_diagnostics = FALSE) {
+                             show_diagnostics = TRUE,
+                             step_by_step = FALSE,
+                             view_steps = interactive()) {
 
   household_id <- enquo(household_id)
   strata <- enquo(strata)
@@ -108,24 +114,36 @@ Adjust_fex_cepal <- function(data,
     stop("Inclusion probabilities must be greater than zero.", call. = FALSE)
   }
 
-  diagnose_fex <- function(df, fex_var, stage_label) {
-    if (!show_diagnostics) {
-      return(invisible(NULL))
-    }
-
-    cat("\n====================================================\n")
-    cat("Expansion factor diagnostics -", stage_label, "\n")
-    cat("====================================================\n")
-
-    cat("\nNational sum:\n")
-    print(sum(df[[fex_var]], na.rm = TRUE))
-
-    cat("\nSum by major domain:\n")
+  build_summary <- function(df, fex_var) {
     summary_domain <- df %>%
       group_by(!!major_domain) %>%
       summarise(FEX = sum(.data[[fex_var]], na.rm = TRUE), .groups = "drop")
 
-    print(summary_domain)
+    list(
+      national_sum = sum(df[[fex_var]], na.rm = TRUE),
+      by_major_domain = summary_domain
+    )
+  }
+
+  show_stage <- function(stage_label, df, fex_var, summary_obj) {
+    if (show_diagnostics) {
+      cat("\n====================================================\n")
+      cat("Expansion factor diagnostics -", stage_label, "\n")
+      cat("====================================================\n")
+      cat("\nNational sum:\n")
+      print(summary_obj$national_sum)
+      cat("\nSum by major domain:\n")
+      print(summary_obj$by_major_domain)
+    }
+
+    if (view_steps) {
+      utils::View(df, title = paste("Adjust_fex_cepal -", stage_label))
+    }
+
+    if (step_by_step) {
+      readline(prompt = paste0("Press Enter to continue to the next stage after ", stage_label, "... "))
+    }
+
     invisible(NULL)
   }
 
@@ -134,8 +152,10 @@ Adjust_fex_cepal <- function(data,
 
   households <- households %>%
     mutate(d_1k = 1 / ((!!pi_second_stage) * (!!pi_first_stage)))
-  diagnose_fex(households, "d_1k", "A. Basic design weight")
+  summary_a <- build_summary(households, "d_1k")
+  show_stage("A. Basic design weight", households, "d_1k", summary_a)
   steps$step_a <- households
+  steps$summary_a <- summary_a
 
   adjustment_eligibility <- households %>%
     group_by(!!strata) %>%
@@ -149,13 +169,17 @@ Adjust_fex_cepal <- function(data,
   households <- households %>%
     left_join(adjustment_eligibility, by = as_name(strata)) %>%
     mutate(d_2k = if_else((!!outcome) %in% "UNK", 0, a_b * d_1k))
-  diagnose_fex(households, "d_2k", "B. Unknown eligibility adjustment")
+  summary_b <- build_summary(households, "d_2k")
+  show_stage("B. Unknown eligibility adjustment", households, "d_2k", summary_b)
   steps$step_b <- households
+  steps$summary_b <- summary_b
 
   households <- households %>%
     mutate(d_3k = if_else((!!outcome) %in% c("UNK", "IN"), 0, d_2k))
-  diagnose_fex(households, "d_3k", "C. Excluding ineligible units")
+  summary_c <- build_summary(households, "d_3k")
+  show_stage("C. Excluding ineligible units", households, "d_3k", summary_c)
   steps$step_c <- households
+  steps$summary_c <- summary_c
 
   households <- households %>%
     mutate(
@@ -186,8 +210,10 @@ Adjust_fex_cepal <- function(data,
       phi_k = predict(response_model, newdata = households, type = "response"),
       d_4k = if_else(D_k == 1, d_3k / phi_k, 0)
     )
-  diagnose_fex(households, "d_4k", "D. Nonresponse adjustment")
+  summary_d <- build_summary(households, "d_4k")
+  show_stage("D. Nonresponse adjustment", households, "d_4k", summary_d)
   steps$step_d <- households
+  steps$summary_d <- summary_d
 
   final_data <- households %>%
     filter(D_k == 1) %>%
