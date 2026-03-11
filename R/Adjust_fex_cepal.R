@@ -12,7 +12,7 @@
 #' @param data A data frame with household-level records.
 #' @param household_id Unquoted column name with the unique household identifier.
 #' @param strata Unquoted column name with the sampling stratum.
-#' @param outcome Unquoted column name with fieldwork result category.
+#' @param disposition_code Unquoted column name with fieldwork result category.
 #' Valid categories are: `"ER"`, `"ENR"`, `"IN"`, and `"UNK"`.
 #' @param major_domain Unquoted column name for major administrative division (DAM).
 #' @param area Unquoted column name for geographic area.
