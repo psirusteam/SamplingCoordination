@@ -50,7 +50,7 @@
 #'   data = toy_data,
 #'   household_id = hh_id,
 #'   strata = stratum,
-#'   outcome = result,
+#'   disposition_code = result,
 #'   major_domain = dam,
 #'   area = area,
 #'   pi_second_stage = pi2,
@@ -63,7 +63,7 @@
 Adjust_fex_cepal <- function(data,
                              household_id,
                              strata,
-                             outcome,
+                             disposition_code,
                              major_domain,
                              area,
                              pi_second_stage,
@@ -75,7 +75,7 @@ Adjust_fex_cepal <- function(data,
 
   household_id <- enquo(household_id)
   strata <- enquo(strata)
-  outcome <- enquo(outcome)
+  disposition_code <- enquo(disposition_code)
   major_domain <- enquo(major_domain)
   area <- enquo(area)
   pi_second_stage <- enquo(pi_second_stage)
@@ -84,7 +84,7 @@ Adjust_fex_cepal <- function(data,
   required_vars <- c(
     as_name(household_id),
     as_name(strata),
-    as_name(outcome),
+    as_name(disposition_code),
     as_name(major_domain),
     as_name(area),
     as_name(pi_second_stage),
@@ -99,13 +99,13 @@ Adjust_fex_cepal <- function(data,
     )
   }
 
-  valid_outcomes <- c("ER", "ENR", "IN", "UNK")
-  observed_outcomes <- unique(data[[as_name(outcome)]])
-  if (!all(observed_outcomes %in% valid_outcomes)) {
+  valid_disposition_codes <- c("ER", "ENR", "IN", "UNK")
+  observed_disposition_codes <- unique(data[[as_name(disposition_code)]])
+  if (!all(observed_disposition_codes %in% valid_disposition_codes)) {
     stop(
       paste0(
-        "`outcome` contains invalid categories. Allowed values are: ",
-        paste(valid_outcomes, collapse = ", ")
+        "`disposition_code` contains invalid categories. Allowed values are: ",
+        paste(valid_disposition_codes, collapse = ", ")
       ),
       call. = FALSE
     )
@@ -161,7 +161,7 @@ Adjust_fex_cepal <- function(data,
     group_by(!!strata) %>%
     summarise(
       num = sum(d_1k, na.rm = TRUE),
-      den = sum(d_1k[(!!outcome) %in% c("ER", "ENR", "IN")], na.rm = TRUE),
+      den = sum(d_1k[(!!disposition_code) %in% c("ER", "ENR", "IN")], na.rm = TRUE),
       a_b = num / den,
       .groups = "drop"
     )
@@ -183,8 +183,8 @@ Adjust_fex_cepal <- function(data,
 
   households <- households %>%
     mutate(
-      I_k = if_else((!!outcome) %in% c("ER", "ENR"), 1, 0),
-      D_k = if_else((!!outcome) == "ER", 1, 0),
+      I_k = if_else((!!disposition_code) %in% c("ER", "ENR"), 1, 0),
+      D_k = if_else((!!disposition_code) == "ER", 1, 0),
       .major_domain = as.factor(!!major_domain),
       .area = as.factor(!!area),
       .strata = as.factor(!!strata)
@@ -220,7 +220,7 @@ Adjust_fex_cepal <- function(data,
     select(
       !!household_id,
       !!strata,
-      !!outcome,
+      !!disposition_code,
       d_1k, a_b, d_2k, d_3k, I_k, D_k, phi_k, d_4k
     )
 
