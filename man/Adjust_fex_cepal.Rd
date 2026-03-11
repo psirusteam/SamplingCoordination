@@ -15,8 +15,8 @@ Adjust_fex_cepal(
   pi_first_stage,
   keep_steps = TRUE,
   show_diagnostics = TRUE,
-  step_by_step = FALSE,
-  view_steps = interactive()
+  step_by_step = TRUE,
+  view_steps = TRUE
 )
 }
 \arguments{
@@ -39,7 +39,7 @@ Valid categories are: \code{"ER"}, \code{"ENR"}, \code{"IN"}, and \code{"UNK"}.}
 
 \item{keep_steps}{Logical. If \code{TRUE}, returns all intermediate datasets and the final dataset in a list. If \code{FALSE}, returns only the final dataset.}
 
-\item{show_diagnostics}{Logical. If \code{TRUE}, prints diagnostics for each stage.}
+\item{show_diagnostics}{Deprecated. Kept for backward compatibility; diagnostics are always printed for each stage.}
 
 \item{step_by_step}{Logical. If \code{TRUE}, pauses after each stage until pressing Enter.}
 
@@ -77,7 +77,8 @@ Adjust_fex_cepal(
   pi_first_stage = pi1,
   keep_steps = FALSE,
   show_diagnostics = TRUE,
-  step_by_step = FALSE
+  step_by_step = TRUE,
+  view_steps = TRUE
 )
 }
 \author{

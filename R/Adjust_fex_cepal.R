@@ -20,7 +20,8 @@
 #' @param pi_first_stage Unquoted column name with first-stage inclusion probability.
 #' @param keep_steps Logical. If `TRUE`, returns all intermediate datasets and the final
 #' dataset in a list. If `FALSE`, returns only the final dataset.
-#' @param show_diagnostics Logical. If `TRUE`, prints diagnostics for each stage.
+#' @param show_diagnostics Deprecated. Kept for backward compatibility;
+#' diagnostics are always printed for each stage.
 #' @param step_by_step Logical. If `TRUE`, pauses after each stage until pressing Enter.
 #' @param view_steps Logical. If `TRUE`, opens each stage dataset with `utils::View()`
 #' in interactive sessions.
@@ -56,7 +57,8 @@
 #'   pi_first_stage = pi1,
 #'   keep_steps = FALSE,
 #'   show_diagnostics = TRUE,
-#'   step_by_step = FALSE
+#'   step_by_step = TRUE,
+#'   view_steps = TRUE
 #' )
 Adjust_fex_cepal <- function(data,
                              household_id,
@@ -68,8 +70,8 @@ Adjust_fex_cepal <- function(data,
                              pi_first_stage,
                              keep_steps = TRUE,
                              show_diagnostics = TRUE,
-                             step_by_step = FALSE,
-                             view_steps = interactive()) {
+                             step_by_step = TRUE,
+                             view_steps = TRUE) {
 
   household_id <- enquo(household_id)
   strata <- enquo(strata)
@@ -125,23 +127,21 @@ Adjust_fex_cepal <- function(data,
     )
   }
 
-  show_stage <- function(stage_label, df, fex_var, summary_obj) {
-    if (show_diagnostics) {
-      cat("\n====================================================\n")
-      cat("Expansion factor diagnostics -", stage_label, "\n")
-      cat("====================================================\n")
-      cat("\nNational sum:\n")
-      print(summary_obj$national_sum)
-      cat("\nSum by major domain:\n")
-      print(summary_obj$by_major_domain)
-    }
+  show_stage <- function(stage_label, df, summary_obj) {
+    cat("\n====================================================\n")
+    cat("Expansion factor diagnostics -", stage_label, "\n")
+    cat("====================================================\n")
+    cat("\nNational sum:\n")
+    print(summary_obj$national_sum)
+    cat("\nSum by major domain:\n")
+    print(summary_obj$by_major_domain)
 
     if (view_steps) {
       utils::View(df, title = paste("Adjust_fex_cepal -", stage_label))
     }
 
     if (step_by_step) {
-      readline(prompt = paste0("Press Enter to continue to the next stage after ", stage_label, "... "))
+      readline(prompt = paste0("Presione Enter para continuar al siguiente paso después de ", stage_label, "... "))
     }
 
     invisible(NULL)
@@ -153,7 +153,7 @@ Adjust_fex_cepal <- function(data,
   households <- households %>%
     mutate(d_1k = 1 / ((!!pi_second_stage) * (!!pi_first_stage)))
   summary_a <- build_summary(households, "d_1k")
-  show_stage("A. Basic design weight", households, "d_1k", summary_a)
+  show_stage("A. Basic design weight", households, summary_a)
   steps$step_a <- households
   steps$summary_a <- summary_a
 
@@ -168,16 +168,16 @@ Adjust_fex_cepal <- function(data,
 
   households <- households %>%
     left_join(adjustment_eligibility, by = as_name(strata)) %>%
-    mutate(d_2k = if_else((!!disposition_code) %in% "UNK", 0, a_b * d_1k))
+    mutate(d_2k = if_else((!!outcome) %in% "UNK", 0, a_b * d_1k))
   summary_b <- build_summary(households, "d_2k")
-  show_stage("B. Unknown eligibility adjustment", households, "d_2k", summary_b)
+  show_stage("B. Unknown eligibility adjustment", households, summary_b)
   steps$step_b <- households
   steps$summary_b <- summary_b
 
   households <- households %>%
-    mutate(d_3k = if_else((!!disposition_code) %in% c("UNK", "IN"), 0, d_2k))
+    mutate(d_3k = if_else((!!outcome) %in% c("UNK", "IN"), 0, d_2k))
   summary_c <- build_summary(households, "d_3k")
-  show_stage("C. Excluding ineligible units", households, "d_3k", summary_c)
+  show_stage("C. Excluding ineligible units", households, summary_c)
   steps$step_c <- households
   steps$summary_c <- summary_c
 
@@ -211,7 +211,7 @@ Adjust_fex_cepal <- function(data,
       d_4k = if_else(D_k == 1, d_3k / phi_k, 0)
     )
   summary_d <- build_summary(households, "d_4k")
-  show_stage("D. Nonresponse adjustment", households, "d_4k", summary_d)
+  show_stage("D. Nonresponse adjustment", households, summary_d)
   steps$step_d <- households
   steps$summary_d <- summary_d
 
