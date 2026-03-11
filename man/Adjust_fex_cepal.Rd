@@ -14,7 +14,9 @@ Adjust_fex_cepal(
   pi_second_stage,
   pi_first_stage,
   keep_steps = TRUE,
-  show_diagnostics = FALSE
+  show_diagnostics = TRUE,
+  step_by_step = TRUE,
+  view_steps = TRUE
 )
 }
 \arguments{
@@ -37,12 +39,16 @@ Valid categories are: \code{"ER"}, \code{"ENR"}, \code{"IN"}, and \code{"UNK"}.}
 
 \item{keep_steps}{Logical. If \code{TRUE}, returns all intermediate datasets and the final dataset in a list. If \code{FALSE}, returns only the final dataset.}
 
-\item{show_diagnostics}{Logical. If \code{TRUE}, prints diagnostics for each stage.}
+\item{show_diagnostics}{Deprecated. Kept for backward compatibility; diagnostics are always printed for each stage.}
+
+\item{step_by_step}{Logical. If \code{TRUE}, pauses after each stage until pressing Enter.}
+
+\item{view_steps}{Logical. If \code{TRUE}, opens each stage dataset with \code{utils::View()} in interactive sessions.}
 }
 \value{
 A data frame with adjusted weights for responding eligible households (\code{ER}) including:
 \code{d_1k}, \code{a_b}, \code{d_2k}, \code{d_3k}, \code{I_k}, \code{D_k}, \code{phi_k}, and \code{d_4k}.
-If \code{keep_steps = TRUE}, returns a list with \code{step_a}, \code{step_b}, \code{step_c}, \code{step_d}, and \code{final}.
+If \code{keep_steps = TRUE}, returns a list with \code{step_a}, \code{step_b}, \code{step_c}, \code{step_d}, \code{summary_a}, \code{summary_b}, \code{summary_c}, \code{summary_d}, and \code{final}.
 }
 \description{
 Applies the standard CEPAL workflow to adjust household expansion factors (FEX):
@@ -70,7 +76,9 @@ Adjust_fex_cepal(
   pi_second_stage = pi2,
   pi_first_stage = pi1,
   keep_steps = FALSE,
-  show_diagnostics = FALSE
+  show_diagnostics = TRUE,
+  step_by_step = TRUE,
+  view_steps = TRUE
 )
 }
 \author{
