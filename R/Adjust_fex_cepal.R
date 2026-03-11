@@ -1,8 +1,7 @@
 #' @export
 #' @import dplyr
 #' @import rlang
-#' @importFrom stats binomial glm predict
-#'
+
 #' @title Adjust expansion factors for household surveys (CEPAL method)
 #' @description
 #' Applies the standard CEPAL workflow to adjust household expansion factors (FEX):
@@ -20,10 +19,8 @@
 #' @param pi_first_stage Unquoted column name with first-stage inclusion probability.
 #' @param keep_steps Logical. If `TRUE`, returns all intermediate datasets and the final
 #' dataset in a list. If `FALSE`, returns only the final dataset.
-#' @param show_diagnostics Deprecated. Kept for backward compatibility;
-#' diagnostics are always printed for each stage.
 #' @param step_by_step Logical. If `TRUE`, pauses after each stage until pressing Enter.
-#' @param view_steps Logical. If `TRUE`, opens each stage dataset with `utils::View()`
+#' @param view_steps Logical. If `TRUE`, opens each stage dataset with `View()`
 #' in interactive sessions.
 #'
 #' @return
@@ -56,7 +53,6 @@
 #'   pi_second_stage = pi2,
 #'   pi_first_stage = pi1,
 #'   keep_steps = FALSE,
-#'   show_diagnostics = TRUE,
 #'   step_by_step = TRUE,
 #'   view_steps = TRUE
 #' )
@@ -69,7 +65,6 @@ Adjust_fex_cepal <- function(data,
                              pi_second_stage,
                              pi_first_stage,
                              keep_steps = TRUE,
-                             show_diagnostics = TRUE,
                              step_by_step = TRUE,
                              view_steps = TRUE) {
 
@@ -137,11 +132,11 @@ Adjust_fex_cepal <- function(data,
     print(summary_obj$by_major_domain)
 
     if (view_steps) {
-      utils::View(df, title = paste("Adjust_fex_cepal -", stage_label))
+      View(df, title = paste("Adjust_fex_cepal -", stage_label))
     }
 
     if (step_by_step) {
-      readline(prompt = paste0("Presione Enter para continuar al siguiente paso después de ", stage_label, "... "))
+      readline(prompt = paste0("Press Enter to continue to the next step after this ", stage_label, "... "))
     }
 
     invisible(NULL)
@@ -168,14 +163,14 @@ Adjust_fex_cepal <- function(data,
 
   households <- households %>%
     left_join(adjustment_eligibility, by = as_name(strata)) %>%
-    mutate(d_2k = if_else((!!outcome) %in% "UNK", 0, a_b * d_1k))
+    mutate(d_2k = if_else((!!disposition_code) %in% "UNK", 0, a_b * d_1k))
   summary_b <- build_summary(households, "d_2k")
   show_stage("B. Unknown eligibility adjustment", households, summary_b)
   steps$step_b <- households
   steps$summary_b <- summary_b
 
   households <- households %>%
-    mutate(d_3k = if_else((!!outcome) %in% c("UNK", "IN"), 0, d_2k))
+    mutate(d_3k = if_else((!!disposition_code) %in% c("UNK", "IN"), 0, d_2k))
   summary_c <- build_summary(households, "d_3k")
   show_stage("C. Excluding ineligible units", households, summary_c)
   steps$step_c <- households
@@ -225,7 +220,7 @@ Adjust_fex_cepal <- function(data,
     )
 
   if (keep_steps) {
-    return(c(steps, list(final = final_data)))
+    return(c(steps, list(base_ER_final = final_data)))
   }
 
   final_data
