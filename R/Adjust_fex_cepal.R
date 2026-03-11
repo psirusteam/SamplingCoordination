@@ -27,7 +27,7 @@
 #' A data frame with adjusted weights for responding eligible households (`ER`) including:
 #' `d_1k`, `a_b`, `d_2k`, `d_3k`, `I_k`, `D_k`, `phi_k`, and `d_4k`.
 #' If `keep_steps = TRUE`, returns a list with `step_a`, `step_b`, `step_c`, `step_d`,
-#' `summary_a`, `summary_b`, `summary_c`, `summary_d`, and `final`.
+#' `summary_a`, `summary_b`, `summary_c`, `summary_d`, and `base_ER_final`.
 #'
 
 #' @author Yury Vanessa Ochoa
