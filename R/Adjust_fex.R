@@ -2,9 +2,9 @@
 #' @import dplyr
 #' @import rlang
 
-#' @title Adjust expansion factors for household surveys (CEPAL method)
+#' @title Adjust expansion factors for household surveys
 #' @description
-#' Applies the standard CEPAL workflow to adjust household expansion factors (FEX):
+#' Applies the standard workflow to adjust household expansion factors (FEX):
 #' design weight, adjustment for unknown eligibility, exclusion of ineligible units,
 #' and nonresponse adjustment through a logistic response-propensity model.
 #'
@@ -43,7 +43,7 @@
 #'   pi1 = rep(0.5, 8)
 #' )
 #'
-#' Adjust_fex_cepal(
+#' Adjust_fex(
 #'   data = toy_data,
 #'   household_id = hh_id,
 #'   strata = stratum,
@@ -56,7 +56,7 @@
 #'   step_by_step = TRUE,
 #'   view_steps = TRUE
 #' )
-Adjust_fex_cepal <- function(data,
+Adjust_fex <- function(data,
                              household_id,
                              strata,
                              disposition_code,
@@ -132,7 +132,7 @@ Adjust_fex_cepal <- function(data,
     print(summary_obj$by_major_domain)
 
     if (view_steps) {
-      View(df, title = paste("Adjust_fex_cepal -", stage_label))
+      View(df, title = paste("Adjust_fex -", stage_label))
     }
 
     if (step_by_step) {
