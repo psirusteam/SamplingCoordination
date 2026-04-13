@@ -149,7 +149,7 @@ Overlap_sample <- function(psu_frame,
     prev <- sub[sub[[ant_nm]] == 1, ]
     pool <- sub[sub[[ant_nm]] == 0, ]
     # Number to retain and number of new PSUs
-    n_m <- min(floor(nh * overlap), nrow(prev))
+    n_m <- min(round(nh * overlap), nrow(prev))
     n_u <- nh - n_m
     
     if (n_u > nrow(pool)) {
