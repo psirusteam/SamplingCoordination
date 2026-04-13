@@ -9,9 +9,10 @@ License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Depends: 
-    TeachingSampling,
     tidyverse,
     magrittr,
     dplyr,
     R (>= 3.5)
+Suggests:
+    TeachingSampling
 LazyData: true

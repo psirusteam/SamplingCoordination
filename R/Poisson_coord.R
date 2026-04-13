@@ -1,6 +1,5 @@
 #' @export
 #' @import tidyverse
-#' @import TeachingSampling
 #'
 #' @title
 #' Generate a correlated Poisson process

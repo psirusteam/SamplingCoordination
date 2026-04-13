@@ -57,6 +57,11 @@ Generate_random <-
       Xi_ppt <-  Xi_Perman / (N * pk)
       
       if (isTRUE(Pareto)) {
+        if (!requireNamespace("TeachingSampling", quietly = TRUE))
+          stop(
+            "Package 'TeachingSampling' is required when Pareto = TRUE. ",
+            "Install it with install.packages('TeachingSampling')."
+          )
         pi_k <- TeachingSampling::PikPPS(n, x = xk)
         Xi_Pareto <-
           (Xi_Perman / (1 - Xi_Perman)) / (pi_k / (1 - pi_k))
