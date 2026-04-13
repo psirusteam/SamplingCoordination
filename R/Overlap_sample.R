@@ -148,17 +148,21 @@ Overlap_sample <- function(psu_frame,
     # Split into previous sample and new candidates
     prev <- sub[sub[[ant_nm]] == 1, ]
     pool <- sub[sub[[ant_nm]] == 0, ]
-    
     # Number to retain and number of new PSUs
     n_m <- min(floor(nh * overlap), nrow(prev))
     n_u <- nh - n_m
+    
+    if (n_u > nrow(pool)) {
+      n_u <- nrow(pool)
+      n_m <- nh - n_u
+    }
     
     # ── 3a. Retain from previous sample: order by sort_var, take first n_m ──
     retained_ids <- character(0)
     if (n_m > 0 && nrow(prev) > 0) {
       prev_ord     <- prev[order(prev[[sort_var_nm]]), ]
       retained_ids <- prev_ord[[id_psu_nm]][seq_len(n_m)]
-    }
+    }   
     
     # ── 3b. Select new PSUs: order by sort_var, take first n_u ───────────────
     new_ids <- character(0)
