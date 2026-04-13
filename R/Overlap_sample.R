@@ -1,5 +1,5 @@
 #' @export
-#' @importFrom dplyr left_join mutate bind_rows
+#' @importFrom dplyr left_join mutate bind_rows if_else
 #' @importFrom rlang enquo quo_name sym
 #' @importFrom magrittr %>%
 #'
@@ -12,7 +12,7 @@
 #' are first retained (up to the overlap target), then the remaining PSUs are
 #' selected from those not previously sampled. Both groups are ordered by
 #' `sort_var` (the permanent random number or coordination score already
-#' computed by [Random_coord()]) — no new random numbers are generated inside
+#' computed by [Generate_random_2()]) — no new random numbers are generated inside
 #' this function.
 #'
 #' @return
@@ -27,7 +27,7 @@
 #' }
 #'
 #' @param psu_frame A `data.frame` or `tibble` containing the PSU frame with
-#'   the coordination scores already computed (output of [Random_coord()]).
+#'   the coordination scores already computed (output of [Generate_random_2()]).
 #' @param strata Unquoted name of the stratum variable in `psu_frame`.
 #' @param id_psu Unquoted name of the PSU identifier variable in `psu_frame`.
 #' @param n_h A `data.frame` or `tibble` with two columns: the stratum variable
@@ -46,7 +46,7 @@
 #' @examples
 #' \dontrun{
 #' # Step 1: generate coordination scores
-#' frame <- Overlap_sample(
+#' frame <- Generate_random_2(
 #'   data     = psu_frame,
 #'   id_psu   = cod_estab,
 #'   seed     = 2025,
@@ -195,7 +195,11 @@ Overlap_sample <- function(psu_frame,
   total_sel      <- sum(output$in_sample,            na.rm = TRUE)
   total_retained <- sum(output$type == "retained",   na.rm = TRUE)
   total_new      <- sum(output$type == "new",        na.rm = TRUE)
-  real_overlap   <- round(total_retained / total_sel * 100, 1)
+  real_overlap   <- if (total_sel > 0) {
+    round(total_retained / total_sel * 100, 1)
+  } else {
+    0
+  }
   
   message(
     "=== Overlap_sample summary ===\n",
