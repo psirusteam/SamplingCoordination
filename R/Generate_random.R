@@ -37,7 +37,7 @@ Generate_random <-
     set.seed(seed)
     epsilon <-  runif(1)
     
-    Xi_Coloc <- (rank(Xi_Perman) - epsilon) / N
+    Xi_Coloc <- (base::rank(Xi_Perman) - epsilon) / N
     
     salida <- list(Xi_Perman, Xi_Coloc)
     names(salida) <- c("Xi_Perman", "Xi_Coloc")
