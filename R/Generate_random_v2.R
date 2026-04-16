@@ -180,9 +180,10 @@ Generate_random_2 <- function(data,
     if (method == "Pareto") {
       data <- data %>%
         mutate(
-          pi_i      = n_sample * p_i,
+          pi_i      = round(PikPPS(n = n_sample, x = !!sym(size_var)), 5),
           Xi_Pareto = (Xi_Perman / (1 - Xi_Perman)) / (pi_i / (1 - pi_i))
-        )
+        )%>%
+        select(-p_i)
       if (any(data$pi_i >= 1, na.rm = TRUE))
         warning("Some units have pi_i >= 1. Consider reducing n_sample or ",
                 "reviewing size_var values.", call. = FALSE)
