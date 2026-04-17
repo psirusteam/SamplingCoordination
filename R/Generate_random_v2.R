@@ -180,7 +180,7 @@ Generate_random_2 <- function(data,
     if (method == "Pareto") {
       data <- data %>%
         mutate(
-          pi_i      = round(TeachingSampling::PikPPS(n = n_sample, x = !!sym(size_var)), 5),
+          pi_i      = round(TeachingSampling::PikPPS(n = n_sample, x = .size_var), 5),
           Xi_Pareto = (Xi_Perman / (1 - Xi_Perman)) / (pi_i / (1 - pi_i))
         )%>%
         select(-p_i)
