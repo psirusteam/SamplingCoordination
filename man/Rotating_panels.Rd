@@ -7,26 +7,43 @@
 Rotating_panels(A, B, C, period, value_initial = "A")
 }
 \arguments{
-\item{A}{An integer indicating the length of the first panel.}
+\item{A}{An integer indicating the number of consecutive periods a unit is observed.
+For scheme 500 use \code{A = 5}; for scheme 400 use \code{A = 4}.}
 
-\item{B}{An integer indicating the length of the subsequent panels.}
+\item{B}{An integer indicating the number of periods a unit rests between observation cycles.
+For schemes 400 and 500 use \code{B = 0}.}
 
-\item{C}{An integer indicating the number of repetitions of the panels.}
+\item{C}{An integer indicating the number of times the observation-rest cycle repeats.
+For schemes 400 and 500 use \code{C = 0}.}
 
 \item{period}{An integer indicating the total number of periods required (>= 0).}
 
-\item{value_initial}{A character indicating the initial value to be used in the sequence.}
+\item{value_initial}{A character indicating the initial value to be used in the sequence.
+Default is \code{"A"}.}
 }
 \value{
-a data frame with \code{period} rows and a column for each panel
+A data frame with \code{period} rows and a column for each panel.
+Column names correspond to consecutive letters starting from \code{value_initial}.
 }
 \description{
 Generate a sequence of rotating panels according to the input parameters.
+This function supports rotating panel schemes such as 4(0)0 (scheme 400) and
+5(0)0 (scheme 500), where \code{A} defines the number of consecutive periods
+a unit is observed, \code{B} the number of periods it rests, and \code{C} the
+number of times the observation-rest cycle repeats. For example, scheme 500
+is obtained with \code{A = 5, B = 0, C = 0}, and scheme 400 with
+\code{A = 4, B = 0, C = 0}.
 }
 \examples{
+# Scheme 500: units observed 5 consecutive periods, no rest
 Rotating_panels(5, 0, 0, 40)
 Rotating_panels(5, 0, 0, 40, "A")
+# Scheme 400: units observed 4 consecutive periods, no rest
+Rotating_panels(4, 0, 0, 40)
 }
 \author{
-Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
+Jose Fernando Zea Castro <jfzeac at unal.edu.co>,
+Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>,
+Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>,
+Yury Vanessa Ochoa Montes <yury.ochoa at urosario.edu.co>
 }
