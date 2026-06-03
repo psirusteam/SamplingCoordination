@@ -1,9 +1,5 @@
 # SamplingCoordination
 
-<!-- badges: start -->
-[![R-CMD-check](https://github.com/psirusteam/SamplingCoordination/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/psirusteam/SamplingCoordination/actions/workflows/R-CMD-check.yaml)
-[![License: GPL (>= 2)](https://img.shields.io/badge/License-GPL%20%28%3E%3D%202%29-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
-<!-- badges: end -->
 
 `SamplingCoordination` is an R package that provides tools for the coordination and management of samples in complex rotative survey designs. It is aimed at statisticians and survey methodologists working on household surveys, labor force surveys, and other social surveys that require controlled sample renewal across time periods.
 
