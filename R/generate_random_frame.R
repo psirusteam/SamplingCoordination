@@ -146,7 +146,7 @@ generate_random_frame <- function(data,
   if (method == "Coloc") {
     set.seed(seed)
     epsilon       <- runif(1)
-    data$Xi_Coloc <- (rank(Xi_Perman) - epsilon) / N
+    data$Xi_Coloc <- (base::rank(Xi_Perman) - epsilon) / N
   }
   
   # -- 3. Pareto or Poisson --------------------------------------------------
