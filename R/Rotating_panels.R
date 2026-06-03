@@ -30,11 +30,11 @@
 #'
 #' @examples
 #' # Scheme 500: units observed 5 consecutive periods, no rest
-#' Rotating_panels(5, 0, 0, 40)
-#' Rotating_panels(5, 0, 0, 40, "A")
+#' rotating_panels(5, 0, 0, 40)
+#' rotating_panels(5, 0, 0, 40, "A")
 #' # Scheme 400: units observed 4 consecutive periods, no rest
-#' Rotating_panels(4, 0, 0, 40)
-Rotating_panels <- function(A, B, C, period,
+#' rotating_panels(4, 0, 0, 40)
+rotating_panels <- function(A, B, C, period,
                             value_initial = "A") {
   
   if (!is.numeric(A) || !is.numeric(B) || !is.numeric(C)) {
@@ -45,7 +45,7 @@ Rotating_panels <- function(A, B, C, period,
     stop("value_initial must be a character string of length 1 that corresponds to a letter in the English alphabet")
   }
   
-  Basic_panels <-  Basic_rotating_panels(A, B, C)
+  Basic_panels <-  basic_rotating_panels(A, B, C)
   num_basic_period <- nrow(Basic_panels)
   
   if (period < num_basic_period) {
@@ -53,14 +53,14 @@ Rotating_panels <- function(A, B, C, period,
   }
   
   if (period == num_basic_period) {
-    result_panels <- Basic_rotating_panels(A, B, C)
+    result_panels <- basic_rotating_panels(A, B, C)
   }
   
   if ((period >  num_basic_period) &
       (period %% num_basic_period) == 0) {
     repetition <- period / num_basic_period
     
-    Basic_panels <- Basic_rotating_panels(A, B, C)
+    Basic_panels <- basic_rotating_panels(A, B, C)
     result_panels <- vector(mode = "list", length = repetition)
     result_panels[[1]] <- Basic_panels
     
@@ -76,7 +76,7 @@ Rotating_panels <- function(A, B, C, period,
       (period %% num_basic_period) > 0) {
     repetition <- ceiling(period / num_basic_period)
     
-    Basic_panels <- Basic_rotating_panels(A, B, C)
+    Basic_panels <- basic_rotating_panels(A, B, C)
     result_panels <- vector(mode = "list", length = repetition)
     result_panels[[1]] <- Basic_panels
     

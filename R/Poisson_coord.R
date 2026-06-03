@@ -18,22 +18,22 @@
 #' @param xk A numeric scalar specifying the Poisson parameter.
 #' @param seed An integer specifying the seed for the random number generator. Default is 12345.
 #'
-#' @seealso \code{\link{Generate_random}}
+#' @seealso \code{\link{generate_random}}
 #' @examples
-#' Poisson_coord(type = "positive", Q = 2, N = 10, vctr_n = c(3,3),
+#' poisson_coord(type = "positive", Q = 2, N = 10, vctr_n = c(3,3),
 #'                xk = c(198, 173, 184, 179, 170, 190, 162, 159, 166, 190),
 #'                               seed = 12345)
 #'
 #'
 
-Poisson_coord <-
+poisson_coord <-
   function(type = "negative",
            Q = 2,
            N = 10,
            vctr_n,
            xk,
            seed = 12345) {
-    xi_pps <- Generate_random(N = N, seed = seed,  xk)$Xi_pipt
+    xi_pps <- generate_random(N = N, seed = seed,  xk)$Xi_pipt
     
     if (type == "negative") {
       vctr_a <- rep(NA_real_, Q)

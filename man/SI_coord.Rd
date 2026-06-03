@@ -21,22 +21,22 @@ SI_coord(type = "negative", Q = 2, N = 10, vctr_n, seed = 12345)
 The function returns a data frame with the following columns:
 \itemize{
 \item unit: the unit identifier, from 1 to N
-\item xi_P: the random number generated from the Generate_random function
+\item xi_P: the random number generated from the generate_random function
 \item s1 to sQ: binary variables indicating whether the unit is selected or not, for each category Q.
 }
 }
 \description{
-The function SI_coord generates data that follows the Modified Atkinson-Schönberg (MAS) coordinated sampling scheme. It produces a data frame with information about the sample selection from a population of size N using Q categories. The type can be either negative or positive. The function uses the Generate_random function to generate the random numbers.
+The function SI_coord generates data that follows the Modified Atkinson-Schönberg (MAS) coordinated sampling scheme. It produces a data frame with information about the sample selection from a population of size N using Q categories. The type can be either negative or positive. The function uses the generate_random function to generate the random numbers.
 }
 \examples{
-SI_coord(type = "negative",
+si_coord(type = "negative",
                               Q = 3, N = 100, vctr_n = c(10, 20, 12),
                               seed = 12345)
 
                                                             
 }
 \seealso{
-\code{\link{Generate_random}}
+\code{\link{generate_random}}
 }
 \author{
 Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>

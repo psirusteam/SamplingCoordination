@@ -1,17 +1,28 @@
 Package: SamplingCoordination
 Type: Package
-Title: Coodination of samples for complex rotative designs
+Title: Coordination of Samples for Complex Rotative Designs
 Version: 1.0.1
-Author: José Zea <jfzeac@unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, Stalyn Guerrero <syguerrerog@unal.edu.co>
+Author: José Zea <jfzeac@unal.edu.co>,
+    Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>,
+    Stalyn Guerrero <syguerrerog@unal.edu.co>
+    Yury Vanessa Ochoa Montes <yury.ochoa@urosario.edu.co>
 Maintainer: Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>
-Description: More about what it does (maybe more than one line). Use four spaces when indenting paragraphs within the Description.
+Description: Provides tools for the coordination and management of samples
+    in complex rotative survey designs. Implements methods for rotating panels,
+    overlap control between successive samples, Poisson and Pareto coordination,
+    simple random sampling coordination (SI), and redistribution of primary
+    sampling units (PSU). Designed for use in household and social surveys
+    that require controlled sample renewal across periods.
 License: GPL (>= 2)
 Encoding: UTF-8
-RoxygenNote: 7.2.3
-Depends: 
-    TeachingSampling,
-    tidyverse,
-    magrittr,
+Imports:
     dplyr,
+    magrittr,
+    rlang,
+    TeachingSampling
+Suggests:
+    tidyverse
+Depends:
     R (>= 3.5)
 LazyData: true
+Config/roxygen2/version: 8.0.0

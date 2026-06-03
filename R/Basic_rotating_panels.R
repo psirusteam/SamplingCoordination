@@ -9,14 +9,14 @@
 #' @param B Integer value for the length of the inactive period
 #' @param C Integer value for the number of repetitions
 #' @examples
-#' Basic_rotating_panels(A = 4, B = 8, C = 4) 
-#' Basic_rotating_panels(A = 2, B = 2, C = 4) 
-#' Basic_rotating_panels(A = 5, B = 0, C = 0)  
-#' Basic_rotating_panels(A = 4, B = 0, C = 0) 
-#' Basic_rotating_panels(A = 2, B = 0, C = 0)  
- 
+#' basic_rotating_panels(A = 4, B = 8, C = 4) 
+#' basic_rotating_panels(A = 2, B = 2, C = 4) 
+#' basic_rotating_panels(A = 5, B = 0, C = 0)  
+#' basic_rotating_panels(A = 4, B = 0, C = 0) 
+#' basic_rotating_panels(A = 2, B = 0, C = 0)  
 
-Basic_rotating_panels <- function(A, B, C) {
+
+basic_rotating_panels <- function(A, B, C) {
   
   if (!is.numeric(A) || !is.numeric(B) || !is.numeric(C)) {
     stop("A, B, and C must be numeric")
@@ -44,7 +44,7 @@ Basic_rotating_panels <- function(A, B, C) {
   for (i in 1:(A - 1)) {
     lista[[i + 1]] <-
       c(dplyr::lead(basic_cycle_rep, i)[-(length_period:(length_period - (i -
-                                                                             1)))],
+                                                                            1)))],
         rep(number_panels + 1, i))
   }
   
