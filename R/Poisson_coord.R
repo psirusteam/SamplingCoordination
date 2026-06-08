@@ -1,5 +1,6 @@
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr arrange mutate
+#' @importFrom magrittr %>%
 #'
 #' @title
 #' Generate a correlated Poisson process

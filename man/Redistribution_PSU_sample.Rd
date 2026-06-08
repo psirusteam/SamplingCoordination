@@ -27,6 +27,7 @@ This function calculates the sample size of each panel given the sample size of 
 \examples{
 redistribution_PSU_sample(sample_size_PSU_stratum = 400, Num_panels_period = 4)
 
+
 }
 \author{
 Jose Fernando Zea Castro <jfzeac@unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog@unal.edu.co>

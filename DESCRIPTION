@@ -18,6 +18,9 @@ Encoding: UTF-8
 Imports:
     dplyr,
     magrittr,
+    tidyr,
+    tibble,
+    stats,
     rlang,
     TeachingSampling
 Suggests:

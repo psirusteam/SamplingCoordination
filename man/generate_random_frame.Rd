@@ -82,13 +82,18 @@ scores are computed \strong{within each stratum} independently, so that
 \eqn{\sum_{i \in h} p_i = 1} for each stratum \eqn{h}.
 }
 \examples{
-library(tidyverse)
 set.seed(1)
-frame <- tibble(
-  psu       = paste0("PSU", str_pad(1:20, 2, pad = "0")),
+frame <- data.frame(
+  psu       = paste0("PSU", formatC(1:20, width = 2, flag = "0")),
   strata    = rep(c("A", "B"), each = 10),
-  dwellings = sample(50:150, 20, replace = TRUE)
+  dwellings = c(50, 80, 120, 90, 110, 70, 95, 130, 60, 85,
+                75, 100, 55, 140, 88, 92, 65, 115, 78, 105)
 )
+
+generate_random_frame(data = frame, id_psu = psu, seed = 12345)
+generate_random_frame(data = frame, id_psu = psu, seed = 12345, method = "Coloc")
+generate_random_frame(data = frame, id_psu = psu, seed = 12345,
+                      method = "Poisson", size_var = dwellings, strata = strata)
 
 # MAS: only permanent random number
 generate_random_frame(data = frame, id_psu = psu, seed = 12345, method = "MAS")

@@ -19,7 +19,6 @@
 #' @examples
 #' redistribution_PSU_sample(sample_size_PSU_stratum = 400, Num_panels_period = 4)
 #'
-#' @export
 #' 
 redistribution_PSU_sample <-
   function(sample_size_PSU_stratum,

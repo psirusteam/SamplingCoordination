@@ -1,6 +1,6 @@
 #' @export
-#' @import dplyr
-#' @import rlang
+#' @importFrom dplyr mutate group_by summarise left_join filter select if_else
+#' @importFrom rlang enquo as_name sym
 
 #' @title Adjust expansion factors for household surveys
 #' @description

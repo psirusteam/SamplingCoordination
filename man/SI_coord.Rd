@@ -29,9 +29,9 @@ The function returns a data frame with the following columns:
 The function SI_coord generates data that follows the Modified Atkinson-Schönberg (MAS) coordinated sampling scheme. It produces a data frame with information about the sample selection from a population of size N using Q categories. The type can be either negative or positive. The function uses the generate_random function to generate the random numbers.
 }
 \examples{
-si_coord(type = "negative",
-                              Q = 3, N = 100, vctr_n = c(10, 20, 12),
-                              seed = 12345)
+SI_coord(type = "negative",
+Q = 3, N = 100, vctr_n = c(10, 20, 12),
+seed = 12345)
 
                                                             
 }
