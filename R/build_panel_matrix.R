@@ -1,5 +1,7 @@
 #' @export
 #' @importFrom dplyr bind_rows left_join mutate select distinct any_of rename filter group_by summarise first n
+#' @importFrom tidyr pivot_wider pivot_longer
+#' @importFrom tibble tibble
 #'
 #' @title
 #' Build the final PSU-by-period panel matrix
@@ -223,8 +225,8 @@ build_panel_matrix <- function(assigned_frame,
     ) %>%
     mutate(
       .period = paste0(
-        "T", gsub("Q", "", .data[[quarter_label]]),
-        "_M", gsub("M", "", .data[[month_label]])
+        "T", gsub("\\D+", "", .data[[quarter_label]]),
+        "_M", gsub("\\D+", "", .data[[month_label]])
       )
     ) %>%
     select(dplyr::all_of(c(geo_column, ses_column, psu_column)),
