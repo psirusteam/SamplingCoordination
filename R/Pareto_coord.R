@@ -14,18 +14,18 @@
 #' @param n An integer representing the Pareto shape parameter. The default is NULL.
 #' @param seed An integer specifying the seed to use for the random number generator. The default is 12345.
 #'
-#' @seealso \code{\link{Generate_random}}
+#' @seealso \code{\link{generate_random}}
 #' @examples
-#' Pareto_coord(type = "negative",
+#' pareto_coord(type = "negative",
 #'  Q = 3, N = 16, vctr_n = c(3,3, 3), 
 #'  xk = c(170, 180, 198, 173, 184, 179, 170, 190, 162, 159, 166,
 #'   190, 220, 240, 150, 270), n = 3, seed = 1234567)
 #'   
-#' Pareto_coord(type = "positive", Q = 2, N = 10, vctr_n = c(3,3), 
+#' pareto_coord(type = "positive", Q = 2, N = 10, vctr_n = c(3,3), 
 #'   xk = c(198, 173, 184, 179, 170, 190, 162, 159, 166, 190),
 #'   n = 3, seed = 12345)
 
-Pareto_coord <-
+pareto_coord <-
   function(type = "negative",
            Q = 2,
            N = 10,
@@ -34,11 +34,11 @@ Pareto_coord <-
            n,
            seed = 12345) {
     xi_pareto <-
-      Generate_random(N = N,
-                  seed = seed,
-                  xk,
-                  Pareto = TRUE,
-                  n)$Xi_Pareto
+      generate_random(N = N,
+                      seed = seed,
+                      xk,
+                      Pareto = TRUE,
+                      n)$Xi_Pareto
     
     
     if (type == "negative") {
@@ -48,8 +48,8 @@ Pareto_coord <-
       for (i in 1:Q) {
         vctr_a[i] <- vctr_a[1] + (i - 1) / Q
       }
-   
-    df <-
+      
+      df <-
         data.frame(unit = 1:N, xi_pareto) %>% arrange(xi_pareto) %>%
         mutate(s1 = c(rep(1, vctr_n[1]),  rep(0, N - vctr_n[1])))
       
@@ -60,7 +60,7 @@ Pareto_coord <-
           c(rep(1, vctr_n[i]), rep(0, N - vctr_n[i]))
       }   
     }
-     
+    
     if (type == "positive") {
       vctr_a <- rep(NA_real_, Q)
       vctr_a[1] <- 0
@@ -68,8 +68,8 @@ Pareto_coord <-
       for (i in 1:Q) {
         vctr_a[i] <- vctr_a[1] + 0
       }
-   
-    df <-
+      
+      df <-
         data.frame(unit = 1:N, xi_pareto) %>% arrange(desc(xi_pareto)) %>%
         mutate(s1 = c(rep(1, vctr_n[1]),  rep(0, N - vctr_n[1])))
       

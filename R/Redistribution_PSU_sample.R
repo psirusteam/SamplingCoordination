@@ -17,11 +17,10 @@
 #' @param Num_panels_period Number of panels per PSU.
 #'
 #' @examples
-#' Redistribution_PSU_sample(sample_size_PSU_stratum = 400, Num_panels_period = 4)
+#' redistribution_PSU_sample(sample_size_PSU_stratum = 400, Num_panels_period = 4)
 #'
-#' @export
 #' 
-Redistribution_PSU_sample <-
+redistribution_PSU_sample <-
   function(sample_size_PSU_stratum,
            Num_panels_period) {
     Num_PSU_normal_panels <-

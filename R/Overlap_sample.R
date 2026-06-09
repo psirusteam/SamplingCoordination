@@ -12,7 +12,7 @@
 #' are first retained (up to the overlap target), then the remaining PSUs are
 #' selected from those not previously sampled. Both groups are ordered by
 #' `sort_var` (the permanent random number or coordination score already
-#' computed by [Generate_random_2()]) — no new random numbers are generated inside
+#' computed by [generate_random_frame()]) — no new random numbers are generated inside
 #' this function.
 #'
 #' @return
@@ -27,7 +27,7 @@
 #' }
 #'
 #' @param psu_frame A `data.frame` or `tibble` containing the PSU frame with
-#'   the coordination scores already computed (output of [Generate_random_2()]).
+#'   the coordination scores already computed (output of [generate_random_frame()]).
 #' @param strata Unquoted name of the stratum variable in `psu_frame`.
 #' @param id_psu Unquoted name of the PSU identifier variable in `psu_frame`.
 #' @param n_h A `data.frame` or `tibble` with two columns: the stratum variable
@@ -46,7 +46,7 @@
 #' @examples
 #' \dontrun{
 #' # Step 1: generate coordination scores
-#' frame <- Generate_random_2(
+#' frame <- generate_random_frame(
 #'   data     = psu_frame,
 #'   id_psu   = cod_estab,
 #'   seed     = 2025,
@@ -56,7 +56,7 @@
 #' )
 #'
 #' # Step 2: select overlapped sample
-#' result <- Overlap_sample(
+#' result <- overlap_sample(
 #'   psu_frame   = frame,
 #'   strata      = strata,
 #'   id_psu      = cod_estab,
@@ -71,7 +71,7 @@
 #' result %>% filter(in_sample == 1L)
 #' }
 
-Overlap_sample <- function(psu_frame,
+overlap_sample <- function(psu_frame,
                            strata,
                            id_psu,
                            n_h,
@@ -206,7 +206,7 @@ Overlap_sample <- function(psu_frame,
   }
   
   message(
-    "=== Overlap_sample summary ===\n",
+    "=== overlap_sample summary ===\n",
     "  Total PSUs selected : ", total_sel,      "\n",
     "  Retained (overlap)  : ", total_retained, "\n",
     "  New PSUs            : ", total_new,      "\n",

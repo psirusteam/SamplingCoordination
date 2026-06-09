@@ -1,6 +1,6 @@
 #' @export
-#' @import dplyr
-#' @import rlang
+#' @importFrom dplyr mutate group_by summarise left_join filter select if_else
+#' @importFrom rlang enquo as_name sym
 
 #' @title Adjust expansion factors for household surveys
 #' @description
@@ -43,7 +43,7 @@
 #'   pi1 = rep(0.5, 8)
 #' )
 #'
-#' Adjust_fex(
+#' adjust_fex(
 #'   data = toy_data,
 #'   household_id = hh_id,
 #'   strata = stratum,
@@ -56,7 +56,7 @@
 #'   step_by_step = TRUE,
 #'   view_steps = TRUE
 #' )
-Adjust_fex <- function(data,
+adjust_fex <- function(data,
                              household_id,
                              strata,
                              disposition_code,

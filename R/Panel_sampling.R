@@ -30,14 +30,14 @@
 #' @param PSU_stratum_size The number of PSUs in each stratum (in the population)
 #' @param PSU_stratum_sample_size The number of PSUs to select in each stratum-panel combination (in the sample)
 #' @param seed The seed to use for the random number generator
-#' @seealso \code{\link{Redistribution_PSU}}, 
-#' @seealso \code{\link{Redistribution_PSU_sample}}
+#' @seealso \code{\link{redistribution_PSU}}, 
+#' @seealso \code{\link{redistribution_PSU_sample}}
 #' @examples 
 #' data(Data_PSU)
 #' data(Data_PSU_aggr)
-#' paneles <- cbind(Rotating_panels(A = 5, B = 0, C = 0, period = 13*4), 
-#' Rotating_panels(A = 5, B = 0, C = 0, period = 13*4, value_initial = "F"),
-#' Rotating_panels(A = 5, B = 0, C = 0, period = 13*4, value_initial = "K"))
+#' paneles <- cbind(rotating_panels(A = 5, B = 0, C = 0, period = 13*4), 
+#' rotating_panels(A = 5, B = 0, C = 0, period = 13*4, value_initial = "F"),
+#' rotating_panels(A = 5, B = 0, C = 0, period = 13*4, value_initial = "K"))
 #' 
 #' stratum <- "111"
 #' 
@@ -48,7 +48,7 @@
 #' sample_size_PSU_stratum <-
 #'   Data_PSU_aggr$n_PSU[Data_PSU_aggr$straum_id ==  stratum]
 #' 
-#' Panel_sampling(
+#' panel_sampling(
 #'   DF = dt,
 #'   stratum_column = "straum_id",
 #'   PSU_column = "PSU_id",
@@ -61,7 +61,7 @@
 
 
 
-Panel_sampling <- function(DF,
+panel_sampling <- function(DF,
                            stratum_column,
                            PSU_column,
                            panels ,
@@ -110,11 +110,11 @@ Panel_sampling <- function(DF,
   set.seed(seed)
   DF$random <- runif(n = nrow(DF))
   DF <- arrange(DF, random)
-  info <- Redistribution_PSU(PSU_stratum_size, total_num_panels)
+  info <- redistribution_PSU(PSU_stratum_size, total_num_panels)
   info <- c(info, "Size_PSU_stratum" = nrow(DF))
   
   
-    if (info["Num_large_panels"] != 0) {
+  if (info["Num_large_panels"] != 0) {
     psu1 <- rep(cod_panels[1:info["Num_large_panels"]],
                 rep(info["Num_PSU_large_panels"], info["Num_large_panels"]))
     
@@ -135,7 +135,7 @@ Panel_sampling <- function(DF,
   
   
   info_mue <-
-    Redistribution_PSU_sample(PSU_stratum_sample_size, num_panels_period)
+    redistribution_PSU_sample(PSU_stratum_sample_size, num_panels_period)
   info_mue <-
     c(info_mue, "PSU_stratum_sample_size" = PSU_stratum_sample_size)
   
@@ -193,7 +193,7 @@ Panel_sampling <- function(DF,
   
   info <- c("stratum" = unique(DF$stratum), info)
   info_mue <- c("stratum" = unique(DF$stratum), info_mue)
-
+  
   if (PSU_stratum_size == as.numeric(info[names(info) == "Size_PSU_stratum"]) &
       PSU_stratum_size == nrow(DF)  &
       PSU_stratum_size ==
@@ -221,7 +221,7 @@ Panel_sampling <- function(DF,
   } else {
     chequeo_sample_size_PSU_strata <- "Error_PSU_stratum_sample_size"
   }
- 
+  
   
   result <- list(
     DF,
