@@ -1,6 +1,6 @@
 #' @export
 #' @importFrom stats runif
-#' @importFrom dplyr group_by mutate ungroup
+#' @importFrom dplyr group_by mutate ungroup select
 #' @importFrom magrittr %>%
 #' @importFrom rlang enquo quo_name
 #'
@@ -28,11 +28,18 @@
 #' scores are computed \strong{within each stratum} independently, so that
 #' \eqn{\sum_{i \in h} p_i = 1} for each stratum \eqn{h}.
 #'
+#' If \code{permanent_random} is provided, it is used as the permanent random
+#' number \eqn{\xi_i^P} instead of generating a new one with \code{seed}.
+#' The permanent random number is always returned in the output frame as
+#' \code{Xi_Perman}, regardless of whether it was generated internally or
+#' supplied by the user.
+#'
 #' @return
 #' The input \code{data} frame with additional columns appended:
 #' \describe{
 #'   \item{\code{Xi_Perman}}{Permanent random number \eqn{\xi_i^P \sim U(0,1)}.
-#'     Always returned.}
+#'     Always returned, whether generated internally or supplied via
+#'     \code{permanent_random}.}
 #'   \item{\code{Xi_Coloc}}{Colocated random number. Returned for
 #'     \code{method = "Coloc"}.}
 #'   \item{\code{p_i}}{Size-proportional weight \eqn{p_i = x_k / \sum_h x_k},
@@ -55,7 +62,8 @@
 #'
 #' @param data A \code{data.frame} or \code{tibble} containing the PSU frame.
 #' @param id_psu Unquoted name of the PSU identifier column in \code{data}.
-#' @param seed Integer seed for reproducible random number generation.
+#' @param seed Integer seed for reproducible random number generation. Used to
+#'   generate \code{Xi_Perman} when \code{permanent_random} is not supplied.
 #' @param method Character string indicating which random number to compute.
 #'   One of \code{"MAS"}, \code{"Coloc"}, \code{"Pareto"}, or
 #'   \code{"Poisson"}. Default is \code{"MAS"}.
@@ -69,6 +77,13 @@
 #'   supplied, \eqn{p_i} and all derived scores are computed independently
 #'   within each stratum. If \code{NULL} (default), computations are performed
 #'   over the full frame.
+#' @param permanent_random Optional numeric vector of length \code{nrow(data)}
+#'   with pre-existing permanent random numbers in the open interval \eqn{(0,1)}.
+#'   When supplied, these values are used as \eqn{\xi_i^P} instead of generating
+#'   new ones with \code{seed}. This enables sample coordination across surveys
+#'   that share the same permanent random numbers (e.g., a \code{nap} column
+#'   from a previous survey frame). The values are always returned in the output
+#'   as \code{Xi_Perman}.
 #'
 #' @seealso \code{\link{generate_random}} for a simpler vector-based interface.
 #'
@@ -81,13 +96,8 @@
 #'                 75, 100, 55, 140, 88, 92, 65, 115, 78, 105)
 #' )
 #'
+#' # MAS: generate permanent random number internally
 #' generate_random_frame(data = frame, id_psu = psu, seed = 12345)
-#' generate_random_frame(data = frame, id_psu = psu, seed = 12345, method = "Coloc")
-#' generate_random_frame(data = frame, id_psu = psu, seed = 12345,
-#'                       method = "Poisson", size_var = dwellings, strata = strata)
-#'
-#' # MAS: only permanent random number
-#' generate_random_frame(data = frame, id_psu = psu, seed = 12345, method = "MAS")
 #'
 #' # Colocated random number
 #' generate_random_frame(data = frame, id_psu = psu, seed = 12345, method = "Coloc")
@@ -100,13 +110,21 @@
 #' generate_random_frame(data = frame, id_psu = psu, seed = 12345,
 #'                       method = "Pareto", size_var = dwellings,
 #'                       n_sample = 3, strata = strata)
+#'
+#' # Pareto using pre-existing permanent random numbers (e.g. nap from a previous survey)
+#' frame$nap <- runif(20)
+#' generate_random_frame(data = frame, id_psu = psu, seed = 12345,
+#'                       method = "Pareto", size_var = dwellings,
+#'                       n_sample = 3, strata = strata,
+#'                       permanent_random = frame$nap)
 generate_random_frame <- function(data,
                                   id_psu,
                                   seed,
-                                  method   = "MAS",
-                                  size_var = NULL,
-                                  n_sample = NULL,
-                                  strata   = NULL) {
+                                  method           = "MAS",
+                                  size_var         = NULL,
+                                  n_sample         = NULL,
+                                  strata           = NULL,
+                                  permanent_random = NULL) {
   
   # -- 0. Input validation ---------------------------------------------------
   if (!is.data.frame(data))
@@ -142,9 +160,22 @@ generate_random_frame <- function(data,
   
   N <- nrow(data)
   
-  # -- 1. Permanent random number (always) -----------------------------------
-  set.seed(seed)
-  Xi_Perman      <- runif(N)
+  # -- 1. Permanent random number --------------------------------------------
+  # If permanent_random is supplied, use it as Xi_Perman (e.g. nap from a
+  # previous survey frame). Otherwise generate it internally with seed.
+  # Xi_Perman is always appended to the output frame.
+  if (!is.null(permanent_random)) {
+    if (!is.numeric(permanent_random) || length(permanent_random) != N)
+      stop("`permanent_random` must be a numeric vector of length nrow(data).",
+           call. = FALSE)
+    if (any(permanent_random <= 0 | permanent_random >= 1, na.rm = TRUE))
+      stop("`permanent_random` values must be strictly in (0, 1).",
+           call. = FALSE)
+    Xi_Perman <- permanent_random
+  } else {
+    set.seed(seed)
+    Xi_Perman <- runif(N)
+  }
   data$Xi_Perman <- Xi_Perman
   
   # -- 2. Colocated ----------------------------------------------------------
@@ -166,7 +197,6 @@ generate_random_frame <- function(data,
     
     data$.size_var <- size_vec
     
-    # -- compute p_i, pi_i, scores within stratum or globally ---------------
     if (!is.null(strata_expr)) {
       strata_nm <- quo_name(enquo(strata))
       data <- data %>%
@@ -198,12 +228,9 @@ generate_random_frame <- function(data,
     
     if (method == "Poisson") {
       data <- data %>%
-        mutate(
-          Xi_Poisson = Xi_Perman / (.N_h * p_i)
-        )
+        mutate(Xi_Poisson = Xi_Perman / (.N_h * p_i))
     }
     
-    # remove internal helper columns
     data$.size_var <- NULL
     data$.N_h      <- NULL
   }

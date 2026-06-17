@@ -32,9 +32,7 @@
 #'
 #' @author Yury Vanessa Ochoa
 #' @export
-cyclic_panel_adjustment <- function(assigned_frame,
-                                    demand_table,
-                                    panels_by_scheme,
+cyclic_panel_adjustment <- function(assigned_frame, demand_table, panels_by_scheme,
                                     scheme_column  = "scheme",
                                     geo_column     = "geo",
                                     stratum_column = "stratum",
@@ -46,14 +44,11 @@ cyclic_panel_adjustment <- function(assigned_frame,
     is.data.frame(assigned_frame),
     is.data.frame(demand_table),
     is.list(panels_by_scheme),
-    all(c(geo_column, stratum_column, PSU_column, order_column,
-          scheme_column, "panel") %in% names(assigned_frame)),
-    all(c(geo_column, stratum_column, "panel_letter", "n_assigned")
-        %in% names(demand_table))
+    all(c(geo_column, stratum_column, PSU_column, order_column, scheme_column, "panel") %in% names(assigned_frame)),
+    all(c(geo_column, stratum_column, "panel_letter", "n_assigned") %in% names(demand_table))
   )
   
-  # ── 1. Panel status per geo-stratum-panel ─────────────────────────────────
-  # Count real assigned PSUs per panel-stratum
+  # ── 1. n_real: UPMs asignadas por geo x scheme x panel x stratum ─────────
   n_real <- assigned_frame %>%
     dplyr::filter(!is.na(panel)) %>%
     dplyr::mutate(panel_letter = gsub("[0-9]+", "", panel)) %>%
@@ -63,44 +58,40 @@ cyclic_panel_adjustment <- function(assigned_frame,
     dplyr::summarise(n_real = dplyr::n_distinct(.data[[PSU_column]]),
                      .groups = "drop")
   
-  # Compare against demand to get status per panel-stratum
+  # ── 2. panel_status: paneles incompletos con faltante por NSE ────────────
+  # Expande a todos los NSE de demand_table para detectar NSE sin UPMs
   panel_status <- assigned_frame %>%
     dplyr::filter(!is.na(panel)) %>%
     dplyr::mutate(panel_letter = gsub("[0-9]+", "", panel)) %>%
-    dplyr::distinct(.data[[geo_column]], .data[[scheme_column]],
-                    panel, panel_letter) %>%
+    dplyr::distinct(.data[[geo_column]], .data[[scheme_column]], panel, panel_letter) %>%
     dplyr::left_join(
       demand_table %>%
-        dplyr::select(dplyr::all_of(
-          c(geo_column, stratum_column, "panel_letter", "n_assigned")
-        )),
+        dplyr::select(dplyr::all_of(c(geo_column, stratum_column, "panel_letter", "n_assigned"))) %>%
+        dplyr::distinct(),
       by = c(geo_column, "panel_letter")
     ) %>%
-    dplyr::left_join(n_real,
-                     by = c(geo_column, scheme_column,
-                            "panel", "panel_letter", stratum_column)) %>%
+    dplyr::left_join(
+      n_real,
+      by = c(geo_column, scheme_column, "panel", "panel_letter", stratum_column)
+    ) %>%
     dplyr::mutate(
       n_real  = dplyr::coalesce(n_real, 0L),
       missing = n_assigned - n_real
     ) %>%
     dplyr::filter(missing > 0)
   
-  # ── 2. Identify geos that need adjustment ─────────────────────────────────
+  # ── 3. Estratos que necesitan ajuste ─────────────────────────────────────
   geos_to_adjust <- assigned_frame %>%
     dplyr::distinct(.data[[geo_column]], .data[[scheme_column]]) %>%
     dplyr::filter(.data[[geo_column]] %in% {
-      # Geos with incomplete panels or missing panels vs theoretical sequence
       incomplete_geos <- unique(panel_status[[geo_column]])
       missing_geos <- assigned_frame %>%
         dplyr::distinct(.data[[geo_column]], .data[[scheme_column]]) %>%
         dplyr::rowwise() %>%
-        dplyr::filter(
-          length(setdiff(
-            panels_by_scheme[[.data[[scheme_column]]]],
-            unique(assigned_frame$panel[assigned_frame[[geo_column]] ==
-                                          .data[[geo_column]]])
-          )) > 0
-        ) %>%
+        dplyr::filter(length(setdiff(
+          panels_by_scheme[[.data[[scheme_column]]]],
+          unique(assigned_frame$panel[assigned_frame[[geo_column]] == .data[[geo_column]]])
+        )) > 0) %>%
         dplyr::pull(.data[[geo_column]])
       unique(c(incomplete_geos, missing_geos))
     })
@@ -110,14 +101,13 @@ cyclic_panel_adjustment <- function(assigned_frame,
     return(dplyr::tibble())
   }
   
-  # ── 3. Cyclic assignment per geo ──────────────────────────────────────────
+  # ── 4. Asignación cíclica por geo ────────────────────────────────────────
   dplyr::bind_rows(lapply(seq_len(nrow(geos_to_adjust)), function(g) {
     
-    geo        <- geos_to_adjust[[geo_column]][g]
-    scheme_geo <- geos_to_adjust[[scheme_column]][g]
+    geo         <- geos_to_adjust[[geo_column]][g]
+    scheme_geo  <- geos_to_adjust[[scheme_column]][g]
     mp_sequence <- panels_by_scheme[[scheme_geo]]
     
-    # Incomplete panels first, then missing panels
     incomplete <- panel_status %>%
       dplyr::filter(.data[[geo_column]] == geo) %>%
       dplyr::distinct(panel) %>%
@@ -131,37 +121,36 @@ cyclic_panel_adjustment <- function(assigned_frame,
     panels_to_fill <- unique(c(incomplete, absent))
     if (length(panels_to_fill) == 0) return(NULL)
     
-    # PSU pool ordered by order_column
     psus_by_stratum <- assigned_frame %>%
       dplyr::filter(.data[[geo_column]] == geo) %>%
       dplyr::arrange(.data[[stratum_column]], .data[[order_column]]) %>%
       dplyr::group_by(.data[[stratum_column]]) %>%
       dplyr::summarise(psus = list(.data[[PSU_column]]), .groups = "drop")
     
-    idx_stratum <- setNames(
-      rep(1L, nrow(psus_by_stratum)),
-      psus_by_stratum[[stratum_column]]
-    )
+    idx_stratum <- setNames(rep(1L, nrow(psus_by_stratum)),
+                            psus_by_stratum[[stratum_column]])
     
     dplyr::bind_rows(lapply(panels_to_fill, function(panel) {
       
       letter <- gsub("[0-9]+", "", panel)
       
-      # How many PSUs still needed per stratum for this panel
-      needed <- demand_table %>%
-        dplyr::filter(.data[[geo_column]] == geo, panel_letter == letter) %>%
-        dplyr::select(dplyr::all_of(c(stratum_column, "n_assigned"))) %>%
-        dplyr::left_join(
-          panel_status %>%
-            dplyr::filter(.data[[geo_column]] == geo, panel == !!panel) %>%
-            dplyr::select(dplyr::all_of(c(stratum_column, "n_real"))),
-          by = stratum_column
-        ) %>%
-        dplyr::mutate(
-          n_real  = dplyr::coalesce(n_real, 0L),
-          n_take  = n_assigned - n_real
-        ) %>%
-        dplyr::filter(n_take > 0)
+      # FIX: separar caso incompleto vs ausente
+      needed <- if (panel %in% incomplete) {
+        # CASO 1: panel incompleto — solo tomar el faltante por NSE
+        panel_status %>%
+          dplyr::filter(.data[[geo_column]] == geo, panel == !!panel) %>%
+          dplyr::select(dplyr::all_of(c(stratum_column, "missing"))) %>%
+          dplyr::rename(n_take = missing)
+      } else {
+        # CASO 2: panel ausente — tomar demanda completa por NSE
+        demand_table %>%
+          dplyr::filter(.data[[geo_column]] == geo, panel_letter == letter) %>%
+          dplyr::select(dplyr::all_of(c(stratum_column, "n_assigned"))) %>%
+          dplyr::distinct() %>%
+          dplyr::rename(n_take = n_assigned)
+      }
+      
+      needed <- needed %>% dplyr::filter(n_take > 0)
       
       if (nrow(needed) == 0) return(NULL)
       
@@ -169,16 +158,12 @@ cyclic_panel_adjustment <- function(assigned_frame,
         
         stratum <- needed[[stratum_column]][i]
         n_take  <- needed$n_take[i]
-        psus    <- psus_by_stratum$psus[
-          psus_by_stratum[[stratum_column]] == stratum][[1]]
+        psus    <- psus_by_stratum$psus[psus_by_stratum[[stratum_column]] == stratum][[1]]
         
         if (is.null(psus)) return(NULL)
         
-        # Cyclic index — wraps around without resetting between panels
-        indices             <- ((idx_stratum[stratum] - 1 +
-                                   seq_len(n_take) - 1) %% length(psus)) + 1
-        idx_stratum[stratum] <<- ((idx_stratum[stratum] - 1 + n_take) %%
-                                    length(psus)) + 1
+        indices <- ((idx_stratum[stratum] - 1 + seq_len(n_take) - 1) %% length(psus)) + 1
+        idx_stratum[stratum] <<- ((idx_stratum[stratum] - 1 + n_take) %% length(psus)) + 1
         
         dplyr::tibble(
           !!geo_column     := geo,
