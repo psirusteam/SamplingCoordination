@@ -130,14 +130,12 @@ panel_sample_size_nse <- function(frame,
     stop("`", n_panels_column, "` must be >= 1 for every row.", call. = FALSE)
   
   # ── 1. Stratum-level info ─────────────────────────────────────────────────
-  # Keep only rows with valid monthly sample size
   sample_clean <- sample_table %>%
     filter(
       !is.na(.data[[n_month_column]]),
       .data[[n_month_column]] > 0
     )
   
-  # Quarterly total per geographic stratum
   stratum_info <- sample_clean %>%
     group_by(.data[[geo_column]]) %>%
     mutate(n_quarter = sum(.data[[n_month_column]], na.rm = TRUE)) %>%
@@ -149,38 +147,32 @@ panel_sample_size_nse <- function(frame,
   geos <- unique(sample_clean[[geo_column]])
   
   # ── 2. Internal helper — distribute monthly n across mini-panels ──────────
-  # Mini-panel numbering is continuous across months within the quarter.
-  # offset accumulates the panel count of previous months.
-  .distribute_panels <- function(n_month, n_mp, offset) {
-    n_mp         <- as.integer(n_mp)
-    n_mp_base    <- floor(n_month / n_mp)
-    remainder    <- n_month %% n_mp
-    n_per_mp     <- rep(n_mp_base, n_mp)
+  # FIX: sin offset → mp1-mpN en cada mes, no acumula entre meses
+  .distribute_panels <- function(n_month, n_mp) {
+    n_mp      <- as.integer(n_mp)
+    n_mp_base <- floor(n_month / n_mp)
+    remainder <- n_month %% n_mp
+    n_per_mp  <- rep(n_mp_base, n_mp)
     if (remainder > 0)
       n_per_mp[seq_len(remainder)] <- n_per_mp[seq_len(remainder)] + 1L
     data.frame(
-      mini_panel  = paste0("mp", seq_len(n_mp) + offset),
+      mini_panel  = paste0("mp", seq_len(n_mp)),
       n_mp        = n_per_mp,
       total_month = n_month
     )
   }
   
   # ── 3. Mini-panel sizes per stratum-month ─────────────────────────────────
-  # n_panels_column can vary by month within the same stratum
-  # (e.g. month1 = 1, month2 = 1, month3 = 2 for a 4-panel scheme),
-  # so offset accumulates the actual panel count of each previous month.
   panel_sizes <- bind_rows(lapply(geos, function(geo) {
-    rows   <- sample_clean[sample_clean[[geo_column]] == geo, ]
-    rows   <- rows[order(rows[[month_column]]), ]
-    offset <- 0L
+    rows <- sample_clean[sample_clean[[geo_column]] == geo, ]
+    rows <- rows[order(rows[[month_column]]), ]
     
     bind_rows(lapply(seq_len(nrow(rows)), function(i) {
       n_mp_i <- as.integer(rows[[n_panels_column]][i])
-      out    <- .distribute_panels(rows[[n_month_column]][i], n_mp_i, offset)
+      out    <- .distribute_panels(rows[[n_month_column]][i], n_mp_i)
       out[[geo_column]]      <- geo
       out[[n_panels_column]] <- n_mp_i
       out[[month_column]]    <- rows[[month_column]][i]
-      offset                <<- offset + n_mp_i
       out
     }))
   })) %>%
@@ -189,7 +181,7 @@ panel_sample_size_nse <- function(frame,
         "mini_panel", "n_mp", "total_month")
     ))
   
-  # ── 4. Internal helper — SES proportions and quarterly expected totals ─────
+  # ── 4. Internal helper — SES proportions ──────────────────────────────────
   .calc_ses_proportions <- function(df_stratum, n_quarter) {
     n_quarter <- as.numeric(n_quarter)
     
@@ -229,19 +221,18 @@ panel_sample_size_nse <- function(frame,
     ))
   
   # ── 6. IPFP per geographic stratum ────────────────────────────────────────
+  # FIX: separador "||" evita conflicto con "_" en nombres de mes
   ipfp_results <- lapply(geos, function(geo) {
     mp_geo  <- panel_sizes[panel_sizes[[geo_column]] == geo, ]
     ses_geo <- ses_proportions[ses_proportions[[geo_column]] == geo, ]
     
     if (nrow(ses_geo) == 0 || nrow(mp_geo) == 0) return(NULL)
     
-    # Row marginals: one per (month x mini_panel)
     Row.knw <- setNames(
       mp_geo$n_mp,
-      paste0(mp_geo[[month_column]], "_", mp_geo$mini_panel)
+      paste0(mp_geo[[month_column]], "||", mp_geo$mini_panel)
     )
     
-    # Column marginals: one per SES level, rescaled to match row total
     Col.knw <- setNames(
       ses_geo$expected_ses,
       paste0("SES_", ses_geo[[ses_column]])
@@ -269,12 +260,12 @@ panel_sample_size_nse <- function(frame,
     separate(
       month_mp,
       into = c(month_column, "mini_panel"),
-      sep  = "_(?=mp)",
+      sep  = "\\|\\|",
       fill = "right"
     ) %>%
     mutate(
-      mini_panel   = coalesce(mini_panel, "mp1"),
-      total_mp     = rowSums(across(starts_with("SES_")), na.rm = TRUE)
+      mini_panel = coalesce(mini_panel, "mp1"),
+      total_mp   = rowSums(across(starts_with("SES_")), na.rm = TRUE)
     ) %>%
     group_by(.data[[geo_column]], .data[[month_column]], .type) %>%
     mutate(total_month = sum(total_mp)) %>%
@@ -282,10 +273,13 @@ panel_sample_size_nse <- function(frame,
     group_by(.data[[geo_column]], .type) %>%
     mutate(total_quarter = sum(total_mp)) %>%
     ungroup() %>%
+    # FIX: summarise para evitar many-to-many en el join
     left_join(
       stratum_info %>%
         select(dplyr::all_of(c(geo_column, n_panels_column))) %>%
-        distinct(),
+        group_by(.data[[geo_column]]) %>%
+        summarise(!!n_panels_column := max(.data[[n_panels_column]]),
+                  .groups = "drop"),
       by = geo_column
     ) %>%
     select(
@@ -305,8 +299,8 @@ panel_sample_size_nse <- function(frame,
   )
   
   if (keep_intermediates) {
-    out$panel_sizes      <- panel_sizes
-    out$ses_proportions  <- ses_proportions
+    out$panel_sizes     <- panel_sizes
+    out$ses_proportions <- ses_proportions
   }
   
   out
