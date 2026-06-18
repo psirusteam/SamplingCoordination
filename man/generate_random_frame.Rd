@@ -7,19 +7,17 @@
 generate_random_frame(
   data,
   id_psu,
-  seed,
   method = "MAS",
   size_var = NULL,
   n_sample = NULL,
-  strata = NULL
+  strata = NULL,
+  permanent_random = NULL
 )
 }
 \arguments{
 \item{data}{A \code{data.frame} or \code{tibble} containing the PSU frame.}
 
 \item{id_psu}{Unquoted name of the PSU identifier column in \code{data}.}
-
-\item{seed}{Integer seed for reproducible random number generation.}
 
 \item{method}{Character string indicating which random number to compute.
 One of \code{"MAS"}, \code{"Coloc"}, \code{"Pareto"}, or
@@ -37,12 +35,21 @@ Must satisfy \eqn{n\_sample \times p_i < 1} for all units.}
 supplied, \eqn{p_i} and all derived scores are computed independently
 within each stratum. If \code{NULL} (default), computations are performed
 over the full frame.}
+
+\item{permanent_random}{Optional numeric vector of length \code{nrow(data)}
+with pre-existing permanent random numbers in the open interval \eqn{(0,1)}.
+When supplied, these values are used as \eqn{\xi_i^P} instead of generating
+new ones internally. This enables sample coordination across surveys
+that share the same permanent random numbers (e.g., a \code{nap} column
+from a previous survey frame). The values are always returned in the output
+as \code{Xi_Perman}.}
 }
 \value{
 The input \code{data} frame with additional columns appended:
 \describe{
   \item{\code{Xi_Perman}}{Permanent random number \eqn{\xi_i^P \sim U(0,1)}.
-    Always returned.}
+    Always returned, whether generated internally or supplied via
+    \code{permanent_random}.}
   \item{\code{Xi_Coloc}}{Colocated random number. Returned for
     \code{method = "Coloc"}.}
   \item{\code{p_i}}{Size-proportional weight \eqn{p_i = x_k / \sum_h x_k},
@@ -80,9 +87,34 @@ variables. The type of random number computed depends on the \code{method} argum
 When \code{strata} is supplied, \eqn{p_i}, \eqn{\pi_i}, and the coordination
 scores are computed \strong{within each stratum} independently, so that
 \eqn{\sum_{i \in h} p_i = 1} for each stratum \eqn{h}.
+
+If \code{permanent_random} is provided, it is used as the permanent random
+number \eqn{\xi_i^P} instead of generating a new one internally.
+The permanent random number is always returned in the output frame as
+\code{Xi_Perman}, regardless of whether it was generated internally or
+supplied by the user.
+}
+\note{
+To ensure unique permanent random numbers across strata when iterating
+with a loop, set the seed once outside the loop and let the internal
+\code{runif} calls continue the sequence:
+\preformatted{
+set.seed(12345)
+resultados <- list()
+for (est in unique(frame$strata)) {
+  df <- frame[frame$strata == est, ]
+  resultados[[est]] <- generate_random_frame(
+    data     = df,
+    id_psu   = psu,
+    method   = "Pareto",
+    size_var = dwellings,
+    n_sample = 3
+  )
+}
+dplyr::bind_rows(resultados)
+}
 }
 \examples{
-set.seed(1)
 frame <- data.frame(
   psu       = paste0("PSU", formatC(1:20, width = 2, flag = "0")),
   strata    = rep(c("A", "B"), each = 10),
@@ -90,25 +122,31 @@ frame <- data.frame(
                 75, 100, 55, 140, 88, 92, 65, 115, 78, 105)
 )
 
-generate_random_frame(data = frame, id_psu = psu, seed = 12345)
-generate_random_frame(data = frame, id_psu = psu, seed = 12345, method = "Coloc")
-generate_random_frame(data = frame, id_psu = psu, seed = 12345,
-                      method = "Poisson", size_var = dwellings, strata = strata)
+# MAS
+set.seed(12345)
+generate_random_frame(data = frame, id_psu = psu)
 
-# MAS: only permanent random number
-generate_random_frame(data = frame, id_psu = psu, seed = 12345, method = "MAS")
-
-# Colocated random number
-generate_random_frame(data = frame, id_psu = psu, seed = 12345, method = "Coloc")
+# Colocated
+set.seed(12345)
+generate_random_frame(data = frame, id_psu = psu, method = "Coloc")
 
 # Poisson by stratum
-generate_random_frame(data = frame, id_psu = psu, seed = 12345,
+set.seed(12345)
+generate_random_frame(data = frame, id_psu = psu,
                       method = "Poisson", size_var = dwellings, strata = strata)
 
-# Pareto by stratum (requires n_sample)
-generate_random_frame(data = frame, id_psu = psu, seed = 12345,
+# Pareto by stratum
+set.seed(12345)
+generate_random_frame(data = frame, id_psu = psu,
                       method = "Pareto", size_var = dwellings,
                       n_sample = 3, strata = strata)
+
+# Pareto using pre-existing permanent random numbers
+frame$nap <- runif(20)
+generate_random_frame(data = frame, id_psu = psu,
+                      method = "Pareto", size_var = dwellings,
+                      n_sample = 3, strata = strata,
+                      permanent_random = frame$nap)
 }
 \seealso{
 \code{\link{generate_random}} for a simpler vector-based interface.
