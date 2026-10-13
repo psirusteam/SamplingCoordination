@@ -53,15 +53,24 @@ Allocate PSUs to mini-panels and build the full period matrix.
 
 ### 4. Sample coordination
 
-Select and overlap samples across periods using coordination scores.
+#### 4.1 Applied coordination on a PSU frame
+
+Work directly on the PSU frame, by stratum, using ordering numbers already computed (e.g. with `generate_random_frame()`). Use these functions for production surveys.
+
+| Function | Description |
+|---|---|
+| `select_coordinated_PSUs()` | Negative or positive coordination of a new survey against one or more previous samples (e.g. ECE, EH), each survey keeping its own ordering number (Pareto, permanent, size...), ascending or descending, by stratum and optionally by period |
+| `overlap_sample()` | Rotation within the same survey: keeps a target share of PSUs from the previous period and completes with new PSUs, by stratum |
+
+#### 4.2 Theoretical / illustrative schemes
+
+Classical coordination by shifting one common permanent random number, (&xi; + a) mod 1. They simulate units `1:N` with their own random numbers, without a PSU frame or strata, and assume all surveys share the same random number and selection scheme. Useful for teaching and for checking the theory; for real frames use section 4.1.
 
 | Function | Description |
 |---|---|
 | `SI_coord()` | Coordinated simple random sampling (negative or positive coordination) |
-| `pareto_coord()` | Coordinated Pareto sampling |
-| `poisson_coord()` | Coordinated Poisson (PPS) sampling |
-| `overlap_sample()` | Selects a coordinated sample between two periods with a target overlap rate |
-| `select_coordinated_PSUs()` | Negative or positive coordination of a new survey against one or more previous samples, using any ordering number (e.g. survey-specific Pareto numbers), ascending or descending, by stratum and period |
+| `pareto_coord()` | Coordinated Pareto sampling (negative or positive coordination) |
+| `poisson_coord()` | Coordinated Poisson (PPS) sampling (negative or positive coordination) |
 
 ### 5. Utilities
 
@@ -178,21 +187,6 @@ result$panel_matrix
 result$verification
 ```
 
-### Coordinated sample with overlap between two periods
-
-```r
-result <- overlap_sample(
-  psu_frame   = frame_coord,
-  strata      = strata,
-  id_psu      = psu,
-  n_h         = data.frame(strata = c("A", "B"), n_h = c(4, 4)),
-  overlap     = 0.38,
-  prev_sample = in_sample_prev,
-  method      = "Pareto",
-  sort_var    = Xi_Pareto
-)
-```
-
 ### Coordinate a new survey against previous samples with different ordering numbers
 
 ```r
@@ -214,6 +208,21 @@ res <- select_coordinated_PSUs(
 
 res$frame          # input frame + overlap_score, rank_sample_EPF, sample_EPF, quarter
 res$verification   # per stratum: required, selected, overlap with each survey, status
+```
+
+### Coordinated sample with overlap between two periods
+
+```r
+result <- overlap_sample(
+  psu_frame   = frame_coord,
+  strata      = strata,
+  id_psu      = psu,
+  n_h         = data.frame(strata = c("A", "B"), n_h = c(4, 4)),
+  overlap     = 0.38,
+  prev_sample = in_sample_prev,
+  method      = "Pareto",
+  sort_var    = Xi_Pareto
+)
 ```
 
 ## Data
