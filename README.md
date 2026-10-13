@@ -18,8 +18,7 @@ The package follows a natural workflow for rotating panel survey design:
 1. Generate permanent random numbers for PSU coordination.
 2. Define the rotation scheme across periods.
 3. Assign PSUs to mini-panels and build the panel matrix.
-4. Coordinate samples across periods with controlled overlap.
-5. Adjust expansion factors for nonresponse and eligibility.
+4. Coordinate samples across periods and across surveys with controlled overlap.
 
 ## Main Functions
 
@@ -62,14 +61,9 @@ Select and overlap samples across periods using coordination scores.
 | `pareto_coord()` | Coordinated Pareto sampling |
 | `poisson_coord()` | Coordinated Poisson (PPS) sampling |
 | `overlap_sample()` | Selects a coordinated sample between two periods with a target overlap rate |
+| `select_coordinated_PSUs()` | Negative or positive coordination of a new survey against one or more previous samples, using any ordering number (e.g. survey-specific Pareto numbers), ascending or descending, by stratum and period |
 
-### 5. Expansion factors
-
-| Function | Description |
-|---|---|
-| `adjust_fex()` | Adjusts expansion factors: design weight, unknown eligibility, ineligible exclusion, and nonresponse via logistic propensity model |
-
-### 6. Utilities
+### 5. Utilities
 
 | Function | Description |
 |---|---|
@@ -197,6 +191,29 @@ result <- overlap_sample(
   method      = "Pareto",
   sort_var    = Xi_Pareto
 )
+```
+
+### Coordinate a new survey against previous samples with different ordering numbers
+
+```r
+# frame: one row per PSU with 0/1 flags of previous samples (ECE, EH)
+# and the ordering number of the new survey (e.g. its own Pareto number)
+res <- select_coordinated_PSUs(
+  frame          = psu_frame,
+  n              = sizes_by_stratum_quarter,   # stratum x quarter, column n
+  prev_columns   = c("sample_ECE_y1", "sample_EH"),
+  order_column   = "Xi_Pareto_EPF",
+  decreasing     = FALSE,
+  type           = "negative",                 # or "positive"
+  rule           = "prioritize",               # or "strict"
+  stratum_column = "strata_nse",
+  period_column  = "quarter",
+  psu_column     = "upm",
+  sample_name    = "sample_EPF"
+)
+
+res$frame          # input frame + overlap_score, rank_sample_EPF, sample_EPF, quarter
+res$verification   # per stratum: required, selected, overlap with each survey, status
 ```
 
 ## Data

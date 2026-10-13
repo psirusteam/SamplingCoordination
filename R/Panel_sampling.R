@@ -33,6 +33,7 @@
 #' @seealso \code{\link{redistribution_PSU}}, 
 #' @seealso \code{\link{redistribution_PSU_sample}}
 #' @examples 
+#' library(dplyr)
 #' data(Data_PSU)
 #' data(Data_PSU_aggr)
 #' paneles <- cbind(rotating_panels(A = 5, B = 0, C = 0, period = 13*4), 

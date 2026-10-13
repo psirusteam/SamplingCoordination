@@ -40,8 +40,10 @@ in all cases orders by `sort_var` ascending and takes the first units.}
 `psu_frame` (e.g., `Xi_Poisson`, `Xi_Pareto`, `Xi_Perman`).}
 }
 \value{
-The input `psu_frame` with additional columns:
+The input `psu_frame` (same rows, same order) with additional columns:
 \describe{
+  \item{`n_h`}{Required sample size of the stratum (\code{NA} if the
+    stratum is not in `n_h`).}
   \item{`n_m`}{Number of PSUs retained from the previous period in the stratum.}
   \item{`n_u`}{Number of new PSUs selected in the stratum.}
   \item{`in_sample`}{Integer (1/0): 1 if the PSU is selected in the current
@@ -58,6 +60,19 @@ selected from those not previously sampled. Both groups are ordered by
 `sort_var` (the permanent random number or coordination score already
 computed by [generate_random_frame()]) — no new random numbers are generated inside
 this function.
+}
+\details{
+Within each stratum \eqn{h} the target number of retained PSUs is
+\eqn{n_m = round(n_h \times overlap)} (R's \code{round()}, which rounds
+halves to the even number, e.g. \code{round(2.5) = 2}), capped at the
+number of PSUs in the previous sample. The remaining \eqn{n_u = n_h - n_m}
+PSUs are new. If there are not enough new PSUs, more previous PSUs are
+retained to complete \eqn{n_h}. If the stratum cannot reach \eqn{n_h} at
+all, every available PSU is selected and a warning is issued.
+
+\code{NA} values in `prev_sample` are treated as \code{0} (not in the
+previous sample). PSUs whose stratum has no row in `n_h` are kept in the
+output with \code{in_sample = 0}.
 }
 \examples{
 \dontrun{
