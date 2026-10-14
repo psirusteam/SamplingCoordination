@@ -35,7 +35,7 @@ Sizes must be non-negative integers.}
 
 \item{prev_columns}{Character vector with the names of the 0/1 columns in
 \code{frame} that flag the previous samples to coordinate with
-(e.g. \code{c("sample_ECE_y1", "sample_EH")}). \code{NA} is treated as
+(e.g. \code{c("sample_s1", "sample_s2")}). \code{NA} is treated as
 \code{0}.}
 
 \item{order_column}{Character. Name of the numeric column used to rank PSUs
@@ -107,18 +107,13 @@ stratum \eqn{h}. Optionally, the selected PSUs are spread across periods
 (e.g. quarters) following the period sizes given in \code{n}.
 }
 \details{
-\strong{Why this function.} \code{\link{SI_coord}} and
-\code{\link{pareto_coord}} coordinate samples by shifting one common
-permanent random number (\eqn{(\xi + a) \bmod 1}), which requires that all
-surveys share the same random number, the same frame and the same
-selection scheme. In practice, surveys such as a Labour Force Survey (ECE),
-a Household Survey (EH) and a Budget Survey (EPF) are drawn with
-\emph{different} sorting numbers (e.g. different Pareto numbers
-\eqn{\xi_k (1 - \pi_k) / (\pi_k (1 - \xi_k))} computed with
-survey-specific inclusion probabilities, sample sizes and strata). In that
-setting a shift of a common number cannot guarantee the desired overlap.
-\code{select_coordinated_PSUs()} works directly on the outcome of the
-previous selections, so each survey can keep its own ordering number:
+\strong{Coordination with different ordering numbers.} The function
+works on the outcome of the previous selections (0/1 indicators), not on
+their random numbers. Therefore, each survey can be selected with its own
+ordering number (e.g. a Pareto number computed with its own inclusion
+probabilities, sample sizes and strata), and the new survey does not need
+to share the random number or the selection scheme of the previous ones.
+The overlap score defines the priority of each PSU:
 \itemize{
   \item \code{type = "negative"}: PSUs outside every previous sample are
     taken first; PSUs in fewer previous samples are preferred to PSUs in

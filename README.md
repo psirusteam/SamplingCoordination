@@ -59,12 +59,12 @@ Work directly on the PSU frame, by stratum, using ordering numbers already compu
 
 | Function | Description |
 |---|---|
-| `select_coordinated_PSUs()` | Negative or positive coordination of a new survey against one or more previous samples (e.g. ECE, EH), each survey keeping its own ordering number (Pareto, permanent, size...), ascending or descending, by stratum and optionally by period |
+| `select_coordinated_PSUs()` | Negative or positive coordination of a new survey against one or more previous samples, each survey keeping its own ordering number (Pareto, permanent, size...), ascending or descending, by stratum and optionally by period |
 | `overlap_sample()` | Rotation within the same survey: keeps a target share of PSUs from the previous period and completes with new PSUs, by stratum |
 
 #### 4.2 Theoretical / illustrative schemes
 
-Classical coordination by shifting one common permanent random number, (&xi; + a) mod 1. They simulate units `1:N` with their own random numbers, without a PSU frame or strata, and assume all surveys share the same random number and selection scheme. Useful for teaching and for checking the theory; for real frames use section 4.1.
+Classical coordination by shifting one common permanent random number, (&xi; + a) mod 1, on simulated units `1:N`. Useful for teaching and for illustrating the theory of sample coordination.
 
 | Function | Description |
 |---|---|
@@ -190,23 +190,23 @@ result$verification
 ### Coordinate a new survey against previous samples with different ordering numbers
 
 ```r
-# frame: one row per PSU with 0/1 flags of previous samples (ECE, EH)
+# frame: one row per PSU with 0/1 flags of previous samples
 # and the ordering number of the new survey (e.g. its own Pareto number)
 res <- select_coordinated_PSUs(
   frame          = psu_frame,
   n              = sizes_by_stratum_quarter,   # stratum x quarter, column n
-  prev_columns   = c("sample_ECE_y1", "sample_EH"),
-  order_column   = "Xi_Pareto_EPF",
+  prev_columns   = c("sample_s1", "sample_s2"),
+  order_column   = "Xi_Pareto_new",
   decreasing     = FALSE,
   type           = "negative",                 # or "positive"
   rule           = "prioritize",               # or "strict"
-  stratum_column = "strata_nse",
+  stratum_column = "stratum",
   period_column  = "quarter",
-  psu_column     = "upm",
-  sample_name    = "sample_EPF"
+  psu_column     = "psu",
+  sample_name    = "sample_new"
 )
 
-res$frame          # input frame + overlap_score, rank_sample_EPF, sample_EPF, quarter
+res$frame          # input frame + overlap_score, rank_sample_new, sample_new, quarter
 res$verification   # per stratum: required, selected, overlap with each survey, status
 ```
 
