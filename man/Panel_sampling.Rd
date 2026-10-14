@@ -48,6 +48,7 @@ This function assigns survey units (i.e., PSUs) to panels and samples a specifie
  PSUs and sample size by stratum.
 }
 \examples{
+library(dplyr)
 data(Data_PSU)
 data(Data_PSU_aggr)
 paneles <- cbind(rotating_panels(A = 5, B = 0, C = 0, period = 13*4), 

@@ -1,4 +1,4 @@
-# SamplingCoordination
+# SamplingCoordination <img src="Samplingcoordinationlogo.png" align="right" height="139" alt="Samplingcoordination logo" />
 
 `SamplingCoordination` is an R package that provides tools for the coordination and management of samples in complex rotative survey designs. It is aimed at statisticians and survey methodologists working on household surveys, labor force surveys, and other social surveys that require controlled sample renewal across time periods.
 
@@ -18,8 +18,7 @@ The package follows a natural workflow for rotating panel survey design:
 1. Generate permanent random numbers for PSU coordination.
 2. Define the rotation scheme across periods.
 3. Assign PSUs to mini-panels and build the panel matrix.
-4. Coordinate samples across periods with controlled overlap.
-5. Adjust expansion factors for nonresponse and eligibility.
+4. Coordinate samples across periods and across surveys with controlled overlap.
 
 ## Main Functions
 
@@ -54,22 +53,26 @@ Allocate PSUs to mini-panels and build the full period matrix.
 
 ### 4. Sample coordination
 
-Select and overlap samples across periods using coordination scores.
+#### 4.1 Applied coordination on a PSU frame
+
+Work directly on the PSU frame, by stratum, using ordering numbers already computed (e.g. with `generate_random_frame()`). Use these functions for production surveys.
+
+| Function | Description |
+|---|---|
+| `select_coordinated_PSUs()` | Negative or positive coordination of a new survey against one or more previous samples, each survey keeping its own ordering number (Pareto, permanent, size...), ascending or descending, by stratum and optionally by period |
+| `overlap_sample()` | Rotation within the same survey: keeps a target share of PSUs from the previous period and completes with new PSUs, by stratum |
+
+#### 4.2 Theoretical / illustrative schemes
+
+Classical coordination by shifting one common permanent random number, (&xi; + a) mod 1, on simulated units `1:N`. Useful for teaching and for illustrating the theory of sample coordination.
 
 | Function | Description |
 |---|---|
 | `SI_coord()` | Coordinated simple random sampling (negative or positive coordination) |
-| `pareto_coord()` | Coordinated Pareto sampling |
-| `poisson_coord()` | Coordinated Poisson (PPS) sampling |
-| `overlap_sample()` | Selects a coordinated sample between two periods with a target overlap rate |
+| `pareto_coord()` | Coordinated Pareto sampling (negative or positive coordination) |
+| `poisson_coord()` | Coordinated Poisson (PPS) sampling (negative or positive coordination) |
 
-### 5. Expansion factors
-
-| Function | Description |
-|---|---|
-| `adjust_fex()` | Adjusts expansion factors: design weight, unknown eligibility, ineligible exclusion, and nonresponse via logistic propensity model |
-
-### 6. Utilities
+### 5. Utilities
 
 | Function | Description |
 |---|---|
@@ -182,6 +185,29 @@ result <- build_panel_matrix(
 
 result$panel_matrix
 result$verification
+```
+
+### Coordinate a new survey against previous samples with different ordering numbers
+
+```r
+# frame: one row per PSU with 0/1 flags of previous samples
+# and the ordering number of the new survey (e.g. its own Pareto number)
+res <- select_coordinated_PSUs(
+  frame          = psu_frame,
+  n              = sizes_by_stratum_quarter,   # stratum x quarter, column n
+  prev_columns   = c("sample_s1", "sample_s2"),
+  order_column   = "Xi_Pareto_new",
+  decreasing     = FALSE,
+  type           = "negative",                 # or "positive"
+  rule           = "prioritize",               # or "strict"
+  stratum_column = "stratum",
+  period_column  = "quarter",
+  psu_column     = "psu",
+  sample_name    = "sample_new"
+)
+
+res$frame          # input frame + overlap_score, rank_sample_new, sample_new, quarter
+res$verification   # per stratum: required, selected, overlap with each survey, status
 ```
 
 ### Coordinated sample with overlap between two periods
