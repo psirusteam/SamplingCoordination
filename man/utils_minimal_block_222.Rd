@@ -29,7 +29,9 @@ number of periods, given the repetition vectors for first and second letter colu
 and the block's initial letter.
 }
 \examples{
-utils_minimal_block_222(40, 1:4, c(1, 3, 1, 3), "A")
+# Second-letter repetitions taken from an admissible scenario
+# (see utils_admissible_scenarios_222())
+utils_minimal_block_222(40, 1:4, c(1, 1, 3, 3), "A")
 
 }
 \author{

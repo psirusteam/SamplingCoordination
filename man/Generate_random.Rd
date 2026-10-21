@@ -2,38 +2,66 @@
 % Please edit documentation in R/generate_random.R
 \name{generate_random}
 \alias{generate_random}
-\title{Generation of random samples.}
+\title{Generation of permanent, colocated, Poisson and Pareto random numbers}
 \usage{
 generate_random(N, seed, xk = NULL, Pareto = FALSE, n = NULL)
 }
 \arguments{
-\item{N}{number of random numbers to generate}
+\item{N}{Number of units.}
 
-\item{seed}{seed for the random number generation}
+\item{seed}{Seed for the random number generation.}
 
-\item{xk}{vector of weights for PPS or Pareto distributions. If NULL, the function
-will not generate PPS or Pareto random numbers.}
+\item{xk}{Optional numeric vector of length \code{N} with the size measure
+of each unit (e.g. number of dwellings). If \code{NULL}, only the
+permanent and colocated numbers are returned.}
 
-\item{Pareto}{a boolean indicating whether to generate Pareto random numbers (TRUE)
-or not (FALSE)}
+\item{Pareto}{Logical. If \code{TRUE}, the Pareto number is computed
+instead of the sequential Poisson number. Requires \code{xk} and
+\code{n}.}
 
-\item{n}{a parameter for the Pareto distribution. If NULL, the function will not
-generate Pareto random numbers.}
+\item{n}{Sample size used to compute the inclusion probabilities
+\eqn{\pi_k} of the Pareto number.}
 }
 \value{
-The random number generation returns the permanent and placed random numbers.
+A list with:
+\describe{
+  \item{\code{Xi_Perman}}{Permanent random numbers.}
+  \item{\code{Xi_Coloc}}{Colocated random numbers.}
+  \item{\code{Xi_pipt}}{Sequential Poisson numbers; only when \code{xk}
+    is given and \code{Pareto = FALSE}.}
+  \item{\code{Xi_Pareto}}{Pareto numbers; only when \code{xk} and
+    \code{n} are given and \code{Pareto = TRUE}.}
+}
 }
 \description{
-This function generates random numbers using two different methods: Permutation and
-"colocated" random numbers. Additionally, it can generate Pareto and PPS random numbers
-if the corresponding parameters are specified.
+Generates, for \code{N} units, the permanent random numbers
+\eqn{\xi_k \sim U(0,1)} and the colocated random numbers
+\eqn{(R_k - \epsilon)/N}, where \eqn{R_k} is the rank of \eqn{\xi_k} and
+\eqn{\epsilon \sim U(0,1)} is a single random number independent of the
+\eqn{\xi_k} (Brewer, Early and Joyce, 1972). When a size measure
+\code{xk} is given, it also computes the sequential Poisson number
+\eqn{\xi_k / (N p_k)}, with \eqn{p_k = x_k / \sum x_k} (Ohlsson, 1998),
+or, with \code{Pareto = TRUE}, the Pareto number
+\eqn{[\xi_k / (1 - \xi_k)] / [\pi_k / (1 - \pi_k)]}, with \eqn{\pi_k}
+proportional to \code{xk} for a sample of size \code{n} (Rosen, 1997).
+In all cases the sample is formed by the units with the smallest numbers.
+
+For a PSU frame stored in a \code{data.frame}, with strata, see
+\code{\link{generate_random_frame}}.
 }
 \examples{
-# We want 5 random numbers:
+# Permanent and colocated numbers for 5 units
 generate_random(N = 5, seed = 12345)
-# In case there is an auxiliary variable, the program returns the Pareto random numbers:
+
+# With a size measure: sequential Poisson number
 generate_random(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90))
-generate_random(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90), Pareto = TRUE, n = 3)
+
+# Pareto number for a sample of 3 units
+generate_random(N = 5, seed = 12345, xk = c(50, 40, 70, 30, 90),
+                Pareto = TRUE, n = 3)
+}
+\seealso{
+\code{\link{generate_random_frame}}
 }
 \author{
 Jose Fernando Zea Castro <jfzeac at unal.edu.co>,

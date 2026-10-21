@@ -2,32 +2,46 @@
 % Please edit documentation in R/redistribution_PSU.R
 \name{redistribution_PSU}
 \alias{redistribution_PSU}
-\title{Function to calculate the number of PSUs in each panel}
+\title{Distribute a number of PSUs across panels as evenly as possible}
 \usage{
 redistribution_PSU(num_PSU_strata, total_num_panels)
 }
 \arguments{
-\item{num_PSU_strata}{Numeric vector with the number of strata per PSU.}
+\item{num_PSU_strata}{Number of PSUs to distribute (e.g. the PSUs of a
+stratum in the population).}
 
-\item{total_num_panels}{Numeric scalar with the total number of panels.}
+\item{total_num_panels}{Number of panels.}
 }
 \value{
-A named numeric vector with the following elements:
+A named numeric vector with:
 \describe{
-  \item{Num_large_panels}{The number of large panels.}
-  \item{Num_normal_panels}{The number of normal panels.}
-  \item{Num_panels}{The total number of panels.}
-  \item{Num_PSU_large_panels}{The number of PSUs for the large panels.}
-  \item{Num_PSU_normal_panels}{The number of PSUs for the normal panels.}
-  }
+  \item{Num_large_panels}{Number of panels that receive one extra PSU.}
+  \item{Num_normal_panels}{Number of panels with the base size.}
+  \item{Num_panels}{Total number of panels.}
+  \item{Num_PSU_large_panels}{PSUs in each large panel.}
+  \item{Num_PSU_normal_panels}{PSUs in each normal panel.}
+}
 }
 \description{
-This function calculates the number of panels that must be included in each PSU (Primary Sampling Unit) in order to perform a stratified sampling.
+Splits \code{num_PSU_strata} PSUs into \code{total_num_panels} panels so
+that panel sizes differ by at most one PSU. If the division is not exact,
+the remainder \eqn{r = N - K \lfloor N/K \rfloor} goes to \eqn{r} "large"
+panels with \eqn{\lfloor N/K \rfloor + 1} PSUs, and the other \eqn{K - r}
+"normal" panels receive \eqn{\lfloor N/K \rfloor} PSUs.
+
+It is used by \code{\link{panel_sampling}} to distribute the PSUs of a
+stratum in the population across all panels. The same computation applied
+to the sample size is \code{\link{redistribution_PSU_sample}}.
 }
 \examples{
-redistribution_PSU(num_PSU_strata = 50, total_num_panels = 10)
-
+# 53 PSUs in 10 panels: 3 panels with 6 PSUs and 7 panels with 5 PSUs
+redistribution_PSU(num_PSU_strata = 53, total_num_panels = 10)
+}
+\seealso{
+\code{\link{redistribution_PSU_sample}}, \code{\link{panel_sampling}}
 }
 \author{
-Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
+Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres
+  Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero
+  Gomez <syguerrerog at unal.edu.co>
 }

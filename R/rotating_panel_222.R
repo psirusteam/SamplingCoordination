@@ -130,7 +130,9 @@ utils_admissible_scenarios_222 <- function(n_periods = 40,
 #'   Yury Vanessa Ochoa Montes <yury.ochoa at urosario.edu.co>
 #'
 #' @examples
-#' utils_minimal_block_222(40, 1:4, c(1, 3, 1, 3), "A")
+#' # Second-letter repetitions taken from an admissible scenario
+#' # (see utils_admissible_scenarios_222())
+#' utils_minimal_block_222(40, 1:4, c(1, 1, 3, 3), "A")
 #'
 #' @export
 utils_minimal_block_222 <- function(n_periods, vctr_rep1stLetterCols,
@@ -314,8 +316,13 @@ utils_create_common_elements_matrix <- function(matrix_data) {
 #'   Yury Vanessa Ochoa Montes <yury.ochoa at urosario.edu.co>
 #'
 #' @examples
-#' block <- utils_minimal_block_222(40, 1:4, c(1, 3, 1, 3), "A")
-#' utils_test_contiguous_222(block)
+#' # Admissible block: globalTest = 100
+#' block <- utils_minimal_block_222(40, 1:4, c(1, 1, 3, 3), "A")
+#' utils_test_contiguous_222(block)$globalTest
+#'
+#' # Non-admissible block: globalTest < 100
+#' block_bad <- utils_minimal_block_222(40, 1:4, c(1, 3, 1, 3), "A")
+#' utils_test_contiguous_222(block_bad)$globalTest
 #'
 #' @export
 utils_test_contiguous_222 <- function(block) {

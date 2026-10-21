@@ -22,15 +22,52 @@
 #'   \code{list("12_minipaneles" = mp_teoricos_12, "4_minipaneles" = mp_teoricos_4)}.
 #' @param scheme_column Character. Name of the scheme column. Default \code{"scheme"}.
 #' @param geo_column Character. Name of the geo stratum column. Default \code{"geo"}.
-#' @param stratum_column Character. Name of the NSE stratum column. Default \code{"stratum"}.
+#' @param stratum_column Character. Name of the socioeconomic (SES) stratum column. Default \code{"stratum"}.
 #' @param PSU_column Character. Name of the PSU identifier column. Default \code{"PSU"}.
 #' @param order_column Character. Name of the ordering column. Default \code{"rank"}.
 #'
 #' @return A tibble with columns \code{geo_column}, \code{PSU_column},
 #'   \code{stratum_column}, and \code{panel_cyclic} containing only the
-#'   PSUs added by the cyclic adjustment.
+#'   PSUs added by the cyclic adjustment. If no panel needs adjustment, a
+#'   message is shown and a tibble with the same columns and zero rows is
+#'   returned, so it can still be passed to \code{\link{build_panel_matrix}}.
 #'
 #' @author Yury Vanessa Ochoa
+#' @seealso \code{\link{assign_PSUs_to_panels}},
+#'   \code{\link{build_panel_matrix}} for the complete workflow.
+#'
+#' @examples
+#' # Same toy frame as in assign_PSUs_to_panels(), with geographic stratum
+#' # and rotation scheme
+#' psu_frame <- data.frame(
+#'   geo         = "01",
+#'   scheme      = "AB",
+#'   PSU         = sprintf("PSU%02d", 1:11),
+#'   stratum     = rep(c("low", "high"), times = c(8, 3)),
+#'   rank        = c(0.12, 0.85, 0.33, 0.07, 0.61, 0.48, 0.92, 0.25,
+#'                   0.71, 0.16, 0.54)
+#' )
+#' demand <- data.frame(
+#'   geo          = "01",
+#'   stratum      = rep(c("low", "high"), each = 2),
+#'   panel_letter = rep(c("A", "B"), times = 2),
+#'   n_assigned   = c(2, 1, 1, 1)
+#' )
+#' sequence_AB <- c("A1", "B1", "A2", "B2")
+#'
+#' assigned <- assign_PSUs_to_panels(
+#'   DF = psu_frame, stratum_column = "stratum", PSU_column = "PSU",
+#'   order_column = "rank", demand_table = demand,
+#'   panels_sequence = sequence_AB
+#' )
+#'
+#' # Panel B2 has no "high" PSU: it is completed reusing the PSUs of that
+#' # stratum cyclically, in order of rank
+#' cyclic_panel_adjustment(
+#'   assigned_frame   = assigned,
+#'   demand_table     = demand,
+#'   panels_by_scheme = list(AB = sequence_AB)
+#' )
 #' @export
 cyclic_panel_adjustment <- function(assigned_frame, demand_table, panels_by_scheme,
                                     scheme_column  = "scheme",
@@ -48,7 +85,7 @@ cyclic_panel_adjustment <- function(assigned_frame, demand_table, panels_by_sche
     all(c(geo_column, stratum_column, "panel_letter", "n_assigned") %in% names(demand_table))
   )
   
-  # ── 1. n_real: UPMs asignadas por geo x scheme x panel x stratum ─────────
+  # ── 1. n_real: PSUs assigned by geo x scheme x panel x stratum ───────────
   n_real <- assigned_frame %>%
     dplyr::filter(!is.na(panel)) %>%
     dplyr::mutate(panel_letter = gsub("[0-9]+", "", panel)) %>%
@@ -58,8 +95,8 @@ cyclic_panel_adjustment <- function(assigned_frame, demand_table, panels_by_sche
     dplyr::summarise(n_real = dplyr::n_distinct(.data[[PSU_column]]),
                      .groups = "drop")
   
-  # ── 2. panel_status: paneles incompletos con faltante por NSE ────────────
-  # Expande a todos los NSE de demand_table para detectar NSE sin UPMs
+  # ── 2. panel_status: incomplete panels with shortfall by SES ─────────────
+  # Expand to all SES levels in demand_table to detect SES with no PSUs
   panel_status <- assigned_frame %>%
     dplyr::filter(!is.na(panel)) %>%
     dplyr::mutate(panel_letter = gsub("[0-9]+", "", panel)) %>%
@@ -80,7 +117,7 @@ cyclic_panel_adjustment <- function(assigned_frame, demand_table, panels_by_sche
     ) %>%
     dplyr::filter(missing > 0)
   
-  # ── 3. Estratos que necesitan ajuste ─────────────────────────────────────
+  # ── 3. Strata that need adjustment ───────────────────────────────────────
   geos_to_adjust <- assigned_frame %>%
     dplyr::distinct(.data[[geo_column]], .data[[scheme_column]]) %>%
     dplyr::filter(.data[[geo_column]] %in% {
@@ -98,10 +135,16 @@ cyclic_panel_adjustment <- function(assigned_frame, demand_table, panels_by_sche
   
   if (nrow(geos_to_adjust) == 0) {
     message("No geo requires cyclic adjustment.")
-    return(dplyr::tibble())
+    # Empty result with the expected columns, so it can be passed to
+    # build_panel_matrix() without errors
+    empty <- dplyr::as_tibble(
+      assigned_frame[0, c(geo_column, PSU_column, stratum_column), drop = FALSE]
+    )
+    empty$panel_cyclic <- character(0)
+    return(empty)
   }
   
-  # ── 4. Asignación cíclica por geo ────────────────────────────────────────
+  # ── 4. Cyclic assignment by geo ──────────────────────────────────────────
   dplyr::bind_rows(lapply(seq_len(nrow(geos_to_adjust)), function(g) {
     
     geo         <- geos_to_adjust[[geo_column]][g]
@@ -134,15 +177,15 @@ cyclic_panel_adjustment <- function(assigned_frame, demand_table, panels_by_sche
       
       letter <- gsub("[0-9]+", "", panel)
       
-      # FIX: separar caso incompleto vs ausente
+      # Handle incomplete and missing panels separately
       needed <- if (panel %in% incomplete) {
-        # CASO 1: panel incompleto — solo tomar el faltante por NSE
+        # CASE 1: incomplete panel — take only the shortfall by SES
         panel_status %>%
           dplyr::filter(.data[[geo_column]] == geo, panel == !!panel) %>%
           dplyr::select(dplyr::all_of(c(stratum_column, "missing"))) %>%
           dplyr::rename(n_take = missing)
       } else {
-        # CASO 2: panel ausente — tomar demanda completa por NSE
+        # CASE 2: missing panel — take the full demand by SES
         demand_table %>%
           dplyr::filter(.data[[geo_column]] == geo, panel_letter == letter) %>%
           dplyr::select(dplyr::all_of(c(stratum_column, "n_assigned"))) %>%

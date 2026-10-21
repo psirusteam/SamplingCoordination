@@ -23,8 +23,13 @@ Verifies that a 2-2-2 rotative panel block satisfies the required overlap proper
 }
 }
 \examples{
-block <- utils_minimal_block_222(40, 1:4, c(1, 3, 1, 3), "A")
-utils_test_contiguous_222(block)
+# Admissible block: globalTest = 100
+block <- utils_minimal_block_222(40, 1:4, c(1, 1, 3, 3), "A")
+utils_test_contiguous_222(block)$globalTest
+
+# Non-admissible block: globalTest < 100
+block_bad <- utils_minimal_block_222(40, 1:4, c(1, 3, 1, 3), "A")
+utils_test_contiguous_222(block_bad)$globalTest
 
 }
 \author{

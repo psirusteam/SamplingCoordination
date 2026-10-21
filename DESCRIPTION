@@ -4,15 +4,18 @@ Title: Coordination of Samples for Complex Rotative Designs
 Version: 1.0.2
 Author: José Zea <jfzeac@unal.edu.co>,
     Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>,
-    Stalyn Guerrero <syguerrerog@unal.edu.co>
+    Stalyn Guerrero <syguerrerog@unal.edu.co>,
     Yury Vanessa Ochoa Montes <yury.ochoa@urosario.edu.co>
 Maintainer: Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>
 Description: Provides tools for the coordination and management of samples
-    in complex rotative survey designs. Implements methods for rotating panels,
-    overlap control between successive samples, Poisson and Pareto coordination,
-    simple random sampling coordination (SI), and redistribution of primary
-    sampling units (PSU). Designed for use in household and social surveys
-    that require controlled sample renewal across periods.
+    in complex rotative survey designs. Implements permanent, colocated,
+    sequential Poisson and Pareto random numbers, rotating panel schemes
+    (4-0-0, 5-0-0 and 2-2-2), allocation of primary sampling units (PSU) to
+    mini-panels by socioeconomic stratum with iterative proportional fitting,
+    overlap control between successive periods, and negative or positive
+    coordination of a new sample with previous samples. Designed for use in
+    household and social surveys that require controlled sample renewal
+    across periods.
 License: GPL (>= 2)
 Encoding: UTF-8
 Imports:

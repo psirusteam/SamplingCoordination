@@ -2,42 +2,59 @@
 % Please edit documentation in R/SI_coord.R
 \name{SI_coord}
 \alias{SI_coord}
-\title{Coordinated Simple Random Sampling}
+\title{Coordinated simple random sampling (illustration)}
 \usage{
 SI_coord(type = "negative", Q = 2, N = 10, vctr_n, seed = 12345)
 }
 \arguments{
-\item{type}{a character string, either "negative" or "positive", indicating the type of type (default is "negativa")}
+\item{type}{\code{"negative"} (default) or \code{"positive"}.}
 
-\item{Q}{an integer indicating the number of categories (default is 2)}
+\item{Q}{Number of samples (Q >= 2). Default 2.}
 
-\item{N}{an integer indicating the population size (default is 10)}
+\item{N}{Population size. Default 10.}
 
-\item{vctr_n}{a vector containing the number of units to be selected from each category}
+\item{vctr_n}{Numeric vector of length \code{Q} with the size of each
+sample.}
 
-\item{seed}{an integer value that sets the seed for the random number generator (default is 12345)}
+\item{seed}{Seed for the permanent random number. Default 12345.}
 }
 \value{
-The function returns a data frame with the following columns:
-\itemize{
-\item unit: the unit identifier, from 1 to N
-\item xi_P: the random number generated from the generate_random function
-\item s1 to sQ: binary variables indicating whether the unit is selected or not, for each category Q.
-}
+A data frame sorted by \code{unit} with the columns \code{unit}
+(1 to \code{N}), \code{xi_P} (permanent random number), \code{s1}
+and, for \eqn{i = 2, \ldots, Q}, \code{xi_P<i>} (shifted number) and
+\code{s<i>} (1 if the unit is in sample \eqn{i}, 0 otherwise).
 }
 \description{
-The function SI_coord generates data that follows the Modified Atkinson-Schönberg (MAS) coordinated sampling scheme. It produces a data frame with information about the sample selection from a population of size N using Q categories. The type can be either negative or positive. The function uses the generate_random function to generate the random numbers.
+Selects \code{Q} coordinated simple random samples without replacement
+(MAS, \emph{muestreo aleatorio simple}) of sizes \code{vctr_n} from the
+units \code{1:N}, using one permanent random number \eqn{\xi} generated
+with \code{\link{generate_random}}. Sample 1 contains the
+\code{vctr_n[1]} units with the smallest \eqn{\xi}. Sample \eqn{i}
+contains the \code{vctr_n[i]} units with the smallest
+\eqn{(\xi + a_i) \bmod 1}, where
+\itemize{
+  \item \code{type = "negative"}: \eqn{a_i = (i - 1)/Q}, so the samples
+    start at different points of the interval (0, 1) and overlap as little
+    as possible;
+  \item \code{type = "positive"}: \eqn{a_i = 0}, so all samples start
+    at the same point and overlap as much as possible.
+}
+
+This function is illustrative: it works on simulated units \code{1:N}
+and is useful to teach how coordination by shifting a common permanent
+random number works. To coordinate samples on a real PSU frame see
+\code{\link{select_coordinated_PSUs}} and \code{\link{overlap_sample}}.
 }
 \examples{
-SI_coord(type = "negative",
-Q = 3, N = 100, vctr_n = c(10, 20, 12),
-seed = 12345)
-
-                                                            
+# Three samples with negative coordination
+SI_coord(type = "negative", Q = 3, N = 100, vctr_n = c(10, 20, 12),
+         seed = 12345)
 }
 \seealso{
-\code{\link{generate_random}}
+\code{\link{generate_random}}, \code{\link{select_coordinated_PSUs}}
 }
 \author{
-Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog at unal.edu.co>
+Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres
+  Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero
+  Gomez <syguerrerog at unal.edu.co>
 }

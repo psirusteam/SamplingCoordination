@@ -37,7 +37,8 @@ Define the theoretical rotation structure across periods.
 
 | Function | Description |
 |---|---|
-| `rotating_panels()` | Generates rotating panels for schemes 4-0-0, 5-0-0, and general A-B-C designs |
+| `basic_rotating_panels()` | Basic block of the 4-0-0 or 5-0-0 scheme |
+| `rotating_panels()` | Rotating panels for schemes 4-0-0 (75% overlap between consecutive periods) and 5-0-0 (80%), for any number of periods |
 | `rotating_panel_222()` | Generates rotating panels following the 2-2-2 scheme (50% overlap between contiguous periods) |
 
 ### 3. PSU assignment
@@ -50,6 +51,7 @@ Allocate PSUs to mini-panels and build the full period matrix.
 | `assign_PSUs_to_panels()` | Assigns PSUs to mini-panels sequentially following a theoretical panel sequence |
 | `cyclic_panel_adjustment()` | Completes incomplete or missing mini-panels using cyclic assignment |
 | `build_panel_matrix()` | Builds the final wide PSU-by-period matrix from assigned and cyclic frames |
+| `panel_sampling()` | Alternative for one stratum: distributes its PSUs across all panels and selects the sample in each panel |
 
 ### 4. Sample coordination
 
@@ -76,8 +78,8 @@ Classical coordination by shifting one common permanent random number, (&xi; + a
 
 | Function | Description |
 |---|---|
-| `redistribution_PSU()` | Redistributes PSU counts across panels |
-| `redistribution_PSU_sample()` | Redistributes PSU sample sizes across panels |
+| `redistribution_PSU()` | Splits a number of PSUs across panels as evenly as possible (used by `panel_sampling()`) |
+| `redistribution_PSU_sample()` | Same split applied to the sample size of a stratum across the panels of a period (used by `panel_sampling()`) |
 | `utils_admissible_scenarios_222()` | Computes admissible scenarios for the 2-2-2 panel |
 | `utils_minimal_block_222()` | Generates the minimal repeating block for the 2-2-2 panel |
 | `utils_test_contiguous_222()` | Tests overlap properties of a 2-2-2 panel block |
@@ -91,19 +93,20 @@ Classical coordination by shifting one common permanent random number, (&xi; + a
 library(SamplingCoordination)
 library(tibble)
 
+set.seed(12345)
 frame <- tibble(
   psu       = paste0("PSU", 1:20),
   strata    = rep(c("A", "B"), each = 10),
   dwellings = sample(50:150, 20, replace = TRUE)
 )
 
-# Pareto coordination scores by stratum
+# Pareto coordination scores by stratum (3 PSUs per stratum)
 frame_coord <- generate_random_frame(
   data     = frame,
   id_psu   = psu,
-  seed     = 12345,
   method   = "Pareto",
   size_var = dwellings,
+  n_sample = 3,
   strata   = strata
 )
 ```
@@ -118,7 +121,7 @@ rotation_12 <- cbind(
   rotating_panels(A = 4, B = 0, C = 0, period = 48, value_initial = "I")
 )
 
-# 4 mini-panels: 1 per month, 2 in month 3
+# 4 mini-panels (letters A-D)
 rotation_4 <- rotating_panels(A = 4, B = 0, C = 0, period = 48, value_initial = "A")
 ```
 
@@ -213,6 +216,12 @@ res$verification   # per stratum: required, selected, overlap with each survey, 
 ### Coordinated sample with overlap between two periods
 
 ```r
+# Previous-period sample (0/1), here simulated: 4 PSUs per stratum
+frame_coord$in_sample_prev <- as.integer(
+  ave(frame_coord$Xi_Perman, frame_coord$strata,
+      FUN = function(x) rank((x + 0.5) %% 1)) <= 4
+)
+
 result <- overlap_sample(
   psu_frame   = frame_coord,
   strata      = strata,
@@ -229,12 +238,17 @@ result <- overlap_sample(
 
 The package includes two example datasets:
 
-- **`Data_PSU`** — 13,420 PSUs with stratum and PSU identifiers.
-- **`Data_PSU_aggr`** — 14 strata with PSU counts for population and sample.
+- **`Data_PSU`** — 13,420 rows in 14 strata: 6,710 PSUs, each split into two parts identified by the suffixes `_1` and `_2` of `PSU_id`.
+- **`Data_PSU_aggr`** — for each of the 14 strata, the number of PSUs in the population (`N_PSU`, 6,710 in total; a stratum has `2 * N_PSU` rows in `Data_PSU`) and the sample size (`n_PSU`, 915 in total).
 
 ## References
 
-Gutierrez, H. A. (2009). *Estrategias de muestreo: diseño de encuestas y estimación de parámetros*. Editorial Universidad Santo Tomás.
+- Brewer, K. R. W., Early, L. J. and Joyce, S. F. (1972). Selecting several samples from a single population. *Australian Journal of Statistics*, 14(3), 231–239.
+- Deming, W. E. and Stephan, F. F. (1940). On a least squares adjustment of a sampled frequency table when the expected marginal totals are known. *The Annals of Mathematical Statistics*, 11(4), 427–444.
+- Gutierrez, H. A. (2009). *Estrategias de muestreo: diseño de encuestas y estimación de parámetros*. Editorial Universidad Santo Tomás.
+- Ohlsson, E. (1995). Coordination of samples using permanent random numbers. In B. G. Cox et al. (eds.), *Business Survey Methods*, 153–169. Wiley.
+- Ohlsson, E. (1998). Sequential Poisson sampling. *Journal of Official Statistics*, 14(2), 149–162.
+- Rosén, B. (1997). On sampling with probability proportional to size. *Journal of Statistical Planning and Inference*, 62(2), 159–191.
 
 ## Authors
 
