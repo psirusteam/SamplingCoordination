@@ -88,9 +88,11 @@ A list with two elements:
   \item{\code{panel_matrix}}{A \code{data.frame} in wide format with columns
     \code{geo_column}, \code{ses_column}, \code{psu_column}, and one column
     per period (\code{T1_M1} \ldots \code{T<period>_M3}).}
-  \item{\code{verification}}{A \code{data.frame} with the number of active
-    PSUs per geographic stratum and quarter (wide format). Useful for
-    validating that realised sample sizes match the design.}
+  \item{\code{verification}}{A \code{data.frame} in wide format with, for
+    each geographic stratum and quarter, the number of PSU-month visits
+    (non-zero cells of \code{panel_matrix} in the three months of the
+    quarter). Useful for validating that realised sample sizes match the
+    design.}
 }
 }
 \description{
@@ -102,42 +104,75 @@ matrix where each row is a PSU and each column is a period
 the mini-panel label the PSU belongs to in that period, or \code{"0"} if
 the PSU is not active in that period.
 
-A verification summary of the number of active PSUs per geographic stratum
+A verification summary of the number of PSU-month visits per geographic stratum
 and quarter is always returned alongside the matrix.
 }
 \examples{
-\dontrun{
+library(dplyr)
+data(Data_PSU)
+set.seed(2026)
+
+# Frame: two geographic strata of Data_PSU with a simulated SES stratum
+# and a random number to order the PSUs
+psu_frame <- Data_PSU \%>\%
+  filter(straum_id \%in\% c("111", "321")) \%>\%
+  rename(geo_stratum = straum_id, psu_id = PSU_id) \%>\%
+  mutate(
+    ses_stratum = sample(1:3, n(), replace = TRUE, prob = c(0.5, 0.3, 0.2)),
+    geo_ses     = paste(geo_stratum, ses_stratum, sep = "_"),
+    rank        = runif(n()),
+    scheme      = "4_panels"
+  ) \%>\%
+  # keep only 2 PSUs in stratum 321 x SES 3, so that some mini-panels
+  # remain incomplete and need the cyclic adjustment
+  filter(!(geo_ses == "321_3" & rank > sort(rank[geo_ses == "321_3"])[2]))
+
+# 1. Monthly 4-0-0 rotation for 2 quarters (4 mini-panels per month)
+rotation <- rotating_panels(A = 4, B = 0, C = 0, period = 6)
+rotation_4 <- data.frame(
+  quarter           = rep(paste0("Q", 1:2), each = 3 * 4),
+  month             = rep(paste0("M", rep(1:3, times = 2)), each = 4),
+  theoretical_panel = as.vector(t(as.matrix(rotation)))
+)
+mp_sequence <- unique(rotation_4$theoretical_panel)
+
+# 2. PSUs demanded by mini-panel letter and SES stratum
+demand <- expand.grid(
+  geo_stratum  = c("111", "321"),
+  ses_stratum  = 1:3,
+  panel_letter = LETTERS[1:4],
+  stringsAsFactors = FALSE
+) \%>\%
+  mutate(
+    geo_ses    = paste(geo_stratum, ses_stratum, sep = "_"),
+    n_assigned = ifelse(ses_stratum == 1, 2, 1)
+  )
+
+# 3. Assign PSUs and complete incomplete mini-panels
+assigned <- assign_PSUs_to_panels(
+  DF = psu_frame, stratum_column = "geo_ses", PSU_column = "psu_id",
+  order_column = "rank", demand_table = demand,
+  panels_sequence = mp_sequence
+) \%>\%
+  filter(!is.na(panel))
+
+cyclic <- cyclic_panel_adjustment(
+  assigned_frame = assigned, demand_table = demand,
+  panels_by_scheme = list("4_panels" = mp_sequence),
+  geo_column = "geo_stratum", stratum_column = "ses_stratum",
+  PSU_column = "psu_id"
+)
+
+# 4. PSU x month matrix
 result <- build_panel_matrix(
-  assigned_frame      = assigned_psus,
-  cyclic_frame        = cyclic_psus,
-  rotation_schemes    = list(
-    "12_panels"   = rotation_12,
-    "4_panels"    = rotation_4,
-    "no_rotation" = NULL
-  ),
-  sample_table        = monthly_allocation,
-  period              = 48,
-  geo_column          = "geo_stratum",
-  ses_column          = "ses_stratum",
-  psu_column          = "psu_id",
-  panel_column        = "panel",
-  cyclic_panel_column = "panel_cyclic",
-  scheme_column       = "scheme",
-  quarter_label       = "quarter",
-  month_label         = "month",
-  theoretical_panel   = "theoretical_panel",
-  no_rotation_label   = "no_rotation"
+  assigned_frame   = assigned,
+  cyclic_frame     = cyclic,
+  rotation_schemes = list("4_panels" = rotation_4),
+  sample_table     = distinct(psu_frame, geo_stratum, scheme),
+  period           = 2
 )
-
-result$panel_matrix
+head(result$panel_matrix)
 result$verification
-
-# Export
-writexl::write_xlsx(
-  result$panel_matrix,
-  "Output/selected_psus_intercensal.xlsx"
-)
-}
 }
 \seealso{
 \code{\link{assign_PSUs_to_panels}},

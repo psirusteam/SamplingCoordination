@@ -63,48 +63,76 @@ If \code{keep_intermediates = TRUE}, the list also contains:
 }
 }
 \description{
-Given a PSU frame with socioeconomic strata and a monthly sample allocation
-table, this function:
+Given a PSU frame with socioeconomic (SES) strata and a monthly sample
+allocation table, this function, for each geographic stratum:
 \enumerate{
   \item Distributes each monthly sample (\code{n_month_column}) across
-    \code{n_panels_column} mini-panels using floor + remainder allocation.
-    Mini-panel numbering is continuous across months within the quarter
-    (e.g. month1 \eqn{\to} mp1\ldots mp4, month2 \eqn{\to} mp5\ldots mp8,
-    month3 \eqn{\to} mp9\ldots mp12 when \code{n_panels_column = 4}).
-  \item Computes SES proportions from the frame and distributes the
-    quarterly total proportionally across SES levels.
+    \code{n_panels_column} mini-panels using floor + remainder allocation
+    (the first mini-panels receive the extra PSUs). Mini-panels are
+    numbered \code{mp1}, \ldots, \code{mpK} within each month, so the
+    numbering restarts every month (e.g. with \code{n_panels_column = 4},
+    month1 \eqn{\to} mp1\ldots mp4, month2 \eqn{\to} mp1\ldots mp4).
+  \item Computes the SES proportions in the frame and distributes the total
+    of all the months of the stratum in \code{sample_table} (typically a
+    quarter) proportionally across SES levels, with floor + remainder.
   \item Applies IPFP (\code{TeachingSampling::IPFP}) to allocate PSUs
-    jointly by mini-panel and SES stratum, respecting both marginals.
+    jointly by month x mini-panel and SES stratum, so that the allocation
+    reproduces both margins: mini-panel sizes (rows) and SES totals
+    (columns).
 }
-Both the continuous (raw) and rounded IPFP solutions are returned.
+Both the continuous IPFP solution and its rounded version are returned.
+}
+\details{
+The rounded solution is obtained with \code{round()} cell by cell, so it
+does \strong{not} necessarily reproduce the margins: \code{total_mp},
+\code{total_month} and \code{total_quarter} of \code{ipfp_rounded} can
+differ from the required sizes, especially when cells are small (see the
+example, where many cells are close to 0.5). Always compare these totals
+with \code{sample_table} (or with \code{panel_sizes}, using
+\code{keep_intermediates = TRUE}) and adjust the rounded table before
+using it as the demand for \code{\link{assign_PSUs_to_panels}}.
+
+The number of mini-panels (\code{n_panels_column}) is assumed to be the
+same in every month of a geographic stratum.
 }
 \examples{
-\dontrun{
-# sample_table (long format — one row per stratum x month):
-#   geo_stratum  month    n_month  n_panels
-#   "01_1"       month1        29         4
-#   "01_1"       month2        29         4
-#   "01_1"       month3        30         4
-#   "01_4"       month1         4         1
-#   "01_4"       month2         4         1
-#   "01_4"       month3         5         1
+library(dplyr)
+data(Data_PSU)
+set.seed(2026)
+
+# Frame: two geographic strata with a simulated SES stratum
+psu_frame <- Data_PSU \%>\%
+  filter(straum_id \%in\% c("111", "321")) \%>\%
+  rename(geo_stratum = straum_id) \%>\%
+  mutate(ses_stratum = sample(1:3, n(), replace = TRUE,
+                              prob = c(0.5, 0.3, 0.2)))
+
+# One row per geographic stratum and month of the quarter
+monthly_allocation <- data.frame(
+  geo_stratum = rep(c("111", "321"), each = 3),
+  month       = rep(c("month1", "month2", "month3"), times = 2),
+  n_month     = c(12, 12, 13, 4, 4, 5),
+  n_panels    = rep(c(4, 1), each = 3)
+)
 
 result <- panel_sample_size_nse(
   frame              = psu_frame,
   sample_table       = monthly_allocation,
-  geo_column         = "geo_stratum",
-  ses_column         = "ses_stratum",
-  month_column       = "month",
-  n_month_column     = "n_month",
-  n_panels_column    = "n_panels",
   keep_intermediates = TRUE
 )
 
 result$ipfp_continuous
 result$ipfp_rounded
-result$panel_sizes       # only when keep_intermediates = TRUE
-result$ses_proportions   # only when keep_intermediates = TRUE
-}
+
+# Check the rounded totals against the required sizes
+result$ipfp_rounded \%>\%
+  distinct(geo_stratum, total_quarter) \%>\%
+  left_join(
+    monthly_allocation \%>\%
+      group_by(geo_stratum) \%>\%
+      summarise(required = sum(n_month)),
+    by = "geo_stratum"
+  )
 }
 \seealso{
 \code{\link{rotating_panels}}, \code{\link{assign_PSUs_to_panels}},

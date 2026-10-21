@@ -1,25 +1,28 @@
 #' @export
-#' 
+#'
 #' @title
-#' Redistribution of the PSU sample
+#' Distribute the PSU sample of a stratum across the panels of a period
 #' @description
-#' This function calculates the sample size of each panel given the sample size of the PSU stratum and the number of panels per PSU.
-#' @return A vector with the following elements:
-#' \describe{
-#' \item{Num_large_panels}{Number of panels in large groups.}
-#' \item{Num_normal_panels}{Number of panels in normal groups.}
-#' \item{Num_panels}{Total number of panels.}
-#' \item{Num_PSU_large_panels}{Number of PSUs in large groups.}
-#' \item{Num_PSU_normal_panels}{Number of PSUs in normal groups.}
-#' }
-#' @author Jose Fernando Zea Castro <jfzeac@unal.edu.co>, Hugo Andres Gutierrez Rojas <andres.gutierrez@cepal.org>, Stalyn Yasid Guerrero Gomez <syguerrerog@unal.edu.co>   
-#' @param sample_size_PSU_stratum Sample size of the PSU stratum.
-#' @param Num_panels_period Number of panels per PSU.
+#' Splits the sample size of a stratum among the panels visited in one period
+#' so that panel sample sizes differ by at most one PSU. It is the same
+#' computation as \code{\link{redistribution_PSU}}, applied to the sample
+#' size instead of the population count, and is used by
+#' \code{\link{panel_sampling}}.
+#'
+#' @return A named numeric vector with \code{Num_large_panels},
+#'   \code{Num_normal_panels}, \code{Num_panels}, \code{Num_PSU_large_panels}
+#'   and \code{Num_PSU_normal_panels} (see \code{\link{redistribution_PSU}}).
+#' @author Jose Fernando Zea Castro <jfzeac at unal.edu.co>, Hugo Andres
+#'   Gutierrez Rojas <andres.gutierrez at cepal.org>, Stalyn Yasid Guerrero
+#'   Gomez <syguerrerog at unal.edu.co>
+#' @param sample_size_PSU_stratum Number of PSUs to select in the stratum.
+#' @param Num_panels_period Number of panels visited in each period.
+#' @seealso \code{\link{redistribution_PSU}}, \code{\link{panel_sampling}}
 #'
 #' @examples
-#' redistribution_PSU_sample(sample_size_PSU_stratum = 400, Num_panels_period = 4)
-#'
-#' 
+#' # 109 PSUs in a period with 15 panels: 4 panels of 8 and 11 panels of 7
+#' redistribution_PSU_sample(sample_size_PSU_stratum = 109,
+#'                           Num_panels_period = 15)
 redistribution_PSU_sample <-
   function(sample_size_PSU_stratum,
            Num_panels_period) {

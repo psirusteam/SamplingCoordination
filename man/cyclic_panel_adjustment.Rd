@@ -31,7 +31,7 @@ panel vector. E.g.:
 
 \item{geo_column}{Character. Name of the geo stratum column. Default \code{"geo"}.}
 
-\item{stratum_column}{Character. Name of the NSE stratum column. Default \code{"stratum"}.}
+\item{stratum_column}{Character. Name of the socioeconomic (SES) stratum column. Default \code{"stratum"}.}
 
 \item{PSU_column}{Character. Name of the PSU identifier column. Default \code{"PSU"}.}
 
@@ -40,7 +40,9 @@ panel vector. E.g.:
 \value{
 A tibble with columns \code{geo_column}, \code{PSU_column},
   \code{stratum_column}, and \code{panel_cyclic} containing only the
-  PSUs added by the cyclic adjustment.
+  PSUs added by the cyclic adjustment. If no panel needs adjustment, a
+  message is shown and a tibble with the same columns and zero rows is
+  returned, so it can still be passed to \code{\link{build_panel_matrix}}.
 }
 \description{
 After the initial PSU assignment, some mini-panels may be incomplete
@@ -48,6 +50,43 @@ After the initial PSU assignment, some mini-panels may be incomplete
 incomplete panels first, then fills missing panels, taking PSUs cyclically
 by stratum (ordered by \code{order_column}) without resetting the index
 between panels.
+}
+\examples{
+# Same toy frame as in assign_PSUs_to_panels(), with geographic stratum
+# and rotation scheme
+psu_frame <- data.frame(
+  geo         = "01",
+  scheme      = "AB",
+  PSU         = sprintf("PSU\%02d", 1:11),
+  stratum     = rep(c("low", "high"), times = c(8, 3)),
+  rank        = c(0.12, 0.85, 0.33, 0.07, 0.61, 0.48, 0.92, 0.25,
+                  0.71, 0.16, 0.54)
+)
+demand <- data.frame(
+  geo          = "01",
+  stratum      = rep(c("low", "high"), each = 2),
+  panel_letter = rep(c("A", "B"), times = 2),
+  n_assigned   = c(2, 1, 1, 1)
+)
+sequence_AB <- c("A1", "B1", "A2", "B2")
+
+assigned <- assign_PSUs_to_panels(
+  DF = psu_frame, stratum_column = "stratum", PSU_column = "PSU",
+  order_column = "rank", demand_table = demand,
+  panels_sequence = sequence_AB
+)
+
+# Panel B2 has no "high" PSU: it is completed reusing the PSUs of that
+# stratum cyclically, in order of rank
+cyclic_panel_adjustment(
+  assigned_frame   = assigned,
+  demand_table     = demand,
+  panels_by_scheme = list(AB = sequence_AB)
+)
+}
+\seealso{
+\code{\link{assign_PSUs_to_panels}},
+  \code{\link{build_panel_matrix}} for the complete workflow.
 }
 \author{
 Yury Vanessa Ochoa

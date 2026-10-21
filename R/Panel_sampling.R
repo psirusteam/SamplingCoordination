@@ -43,6 +43,8 @@
 #' stratum <- "111"
 #' 
 #' dt <- Data_PSU %>% filter(straum_id == stratum)
+#' # Data_PSU has two rows per PSU (parts _1 and _2), so the number of
+#' # units to distribute is 2 * N_PSU (= nrow(dt))
 #' Num_PSU_strata <-
 #'   2 * Data_PSU_aggr$N_PSU[Data_PSU_aggr$straum_id ==  stratum]
 #' 

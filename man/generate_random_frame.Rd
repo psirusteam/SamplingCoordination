@@ -100,10 +100,10 @@ with a loop, set the seed once outside the loop and let the internal
 \code{runif} calls continue the sequence:
 \preformatted{
 set.seed(12345)
-resultados <- list()
-for (est in unique(frame$strata)) {
-  df <- frame[frame$strata == est, ]
-  resultados[[est]] <- generate_random_frame(
+results <- list()
+for (h in unique(frame$strata)) {
+  df <- frame[frame$strata == h, ]
+  results[[h]] <- generate_random_frame(
     data     = df,
     id_psu   = psu,
     method   = "Pareto",
@@ -111,7 +111,7 @@ for (est in unique(frame$strata)) {
     n_sample = 3
   )
 }
-dplyr::bind_rows(resultados)
+dplyr::bind_rows(results)
 }
 }
 \examples{

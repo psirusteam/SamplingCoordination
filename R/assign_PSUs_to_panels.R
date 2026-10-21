@@ -34,32 +34,38 @@
 #'
 #' @author Yury Vanessa Ochoa
 #'
+#' @seealso \code{\link{cyclic_panel_adjustment}} to complete the panels
+#'   that remain incomplete, and \code{\link{build_panel_matrix}} for the
+#'   complete workflow on \code{\link{Data_PSU}}.
+#'
 #' @examples
-#' \dontrun{
-#' # 12 mini-panels (letters A-L), 48 periods
-#' mp_sequence <- paste0(rep(LETTERS[1:12], times = 48), rep(1:48, each = 12))
-#'
-#' assign_PSUs_to_panels(
-#'   DF              = marco,
-#'   stratum_column  = "estrato_nse",
-#'   PSU_column      = "upm",
-#'   order_column    = "rank",
-#'   demand_table    = demand,
-#'   panels_sequence = mp_sequence
+#' # 11 PSUs in two SES strata, ordered by a random number
+#' psu_frame <- data.frame(
+#'   psu_id      = sprintf("PSU%02d", 1:11),
+#'   ses_stratum = rep(c("low", "high"), times = c(8, 3)),
+#'   rank        = c(0.12, 0.85, 0.33, 0.07, 0.61, 0.48, 0.92, 0.25,
+#'                   0.71, 0.16, 0.54)
 #' )
 #'
-#' # 4 mini-panels (letters A-D), 48 periods
-#' mp_sequence_4 <- paste0(rep(LETTERS[1:4], times = 48), rep(1:48, each = 4))
+#' # PSUs demanded by each mini-panel letter and SES stratum
+#' demand <- data.frame(
+#'   ses_stratum  = rep(c("low", "high"), each = 2),
+#'   panel_letter = rep(c("A", "B"), times = 2),
+#'   n_assigned   = c(2, 1, 1, 1)
+#' )
 #'
-#' assign_PSUs_to_panels(
-#'   DF              = marco,
-#'   stratum_column  = "estrato_nse",
-#'   PSU_column      = "upm",
+#' assigned <- assign_PSUs_to_panels(
+#'   DF              = psu_frame,
+#'   stratum_column  = "ses_stratum",
+#'   PSU_column      = "psu_id",
 #'   order_column    = "rank",
 #'   demand_table    = demand,
-#'   panels_sequence = mp_sequence_4
+#'   panels_sequence = c("A1", "B1", "A2", "B2")
 #' )
-#' }
+#' assigned[order(assigned$ses_stratum, assigned$rank), ]
+#'
+#' # The "high" stratum runs out of PSUs: panel B2 gets none there
+#' table(assigned$ses_stratum, assigned$panel, useNA = "ifany")
 #' @export
 assign_PSUs_to_panels <- function(DF,
                                   stratum_column,

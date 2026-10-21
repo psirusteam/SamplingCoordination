@@ -75,30 +75,35 @@ previous sample). PSUs whose stratum has no row in `n_h` are kept in the
 output with \code{in_sample = 0}.
 }
 \examples{
-\dontrun{
-# Step 1: generate coordination scores
-frame <- generate_random_frame(
-  data     = psu_frame,
-  id_psu   = cod_estab,
-  seed     = 2025,
-  method   = "Poisson",
-  size_var = n_students,
-  strata   = strata
-)
+library(dplyr)
+data(Data_PSU)
+set.seed(2026)
 
-# Step 2: select overlapped sample
+# Two strata of Data_PSU with a permanent random number
+frame <- Data_PSU \%>\%
+  filter(straum_id \%in\% c("111", "321")) \%>\%
+  generate_random_frame(id_psu = PSU_id, strata = straum_id)
+
+# Previous period: 20 PSUs per stratum, selected with the permanent
+# number shifted by 0.5
+frame <- frame \%>\%
+  group_by(straum_id) \%>\%
+  mutate(prev = as.integer(rank((Xi_Perman + 0.5) \%\% 1) <= 20)) \%>\%
+  ungroup()
+
+# Current period: 20 PSUs per stratum keeping 75\% of the previous sample
 result <- overlap_sample(
   psu_frame   = frame,
-  strata      = strata,
-  id_psu      = cod_estab,
-  n_h         = n_h_df,
-  overlap     = 0.38,
-  prev_sample = in_sample_2025,
-  method      = "Poisson",
-  sort_var    = Xi_Poisson
+  strata      = straum_id,
+  id_psu      = PSU_id,
+  n_h         = data.frame(straum_id = c("111", "321"), n_h = c(20, 20)),
+  overlap     = 0.75,
+  prev_sample = prev,
+  sort_var    = Xi_Perman
 )
 
-# PSUs selected in current period
-result \%>\% filter(in_sample == 1L)
-}
+# 15 retained and 5 new PSUs per stratum
+result \%>\%
+  filter(in_sample == 1) \%>\%
+  count(straum_id, type)
 }

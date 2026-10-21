@@ -63,10 +63,10 @@
 #' \code{runif} calls continue the sequence:
 #' \preformatted{
 #' set.seed(12345)
-#' resultados <- list()
-#' for (est in unique(frame$strata)) {
-#'   df <- frame[frame$strata == est, ]
-#'   resultados[[est]] <- generate_random_frame(
+#' results <- list()
+#' for (h in unique(frame$strata)) {
+#'   df <- frame[frame$strata == h, ]
+#'   results[[h]] <- generate_random_frame(
 #'     data     = df,
 #'     id_psu   = psu,
 #'     method   = "Pareto",
@@ -74,7 +74,7 @@
 #'     n_sample = 3
 #'   )
 #' }
-#' dplyr::bind_rows(resultados)
+#' dplyr::bind_rows(results)
 #' }
 #'
 #' @author Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>,
@@ -230,9 +230,11 @@ generate_random_frame <- function(data,
     }
     
     if (method == "Pareto") {
+      # pi_i = n_sample * p_i, computed within each stratum when `strata` is
+      # supplied (p_i already sums to 1 inside each stratum).
       data <- data %>%
         mutate(
-          pi_i      = round(TeachingSampling::PikPPS(n = n_sample, x = .size_var), 5),
+          pi_i      = round(n_sample * p_i, 5),
           Xi_Pareto = (Xi_Perman / (1 - Xi_Perman)) / (pi_i / (1 - pi_i))
         ) %>%
         select(-p_i)
