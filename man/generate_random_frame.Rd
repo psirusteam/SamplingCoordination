@@ -27,9 +27,11 @@ One of \code{"MAS"}, \code{"Coloc"}, \code{"Pareto"}, or
 PSU size measure (e.g., number of dwellings or households). Required
 when \code{method = "Pareto"} or \code{method = "Poisson"}.}
 
-\item{n_sample}{Integer. Number of PSUs to be selected. Required when
-\code{method = "Pareto"} to compute \eqn{\pi_i = n\_sample \times p_i}.
-Must satisfy \eqn{n\_sample \times p_i < 1} for all units.}
+\item{n_sample}{Integer. Number of PSUs to be selected (in each stratum
+when \code{strata} is supplied). Required when \code{method = "Pareto"}
+to compute the inclusion probabilities with
+\code{\link[TeachingSampling]{PikPPS}}. Cannot be larger than the number
+of PSUs in the frame or in any stratum.}
 
 \item{strata}{Unquoted name of the stratum variable in \code{data}. When
 supplied, \eqn{p_i} and all derived scores are computed independently
@@ -54,10 +56,11 @@ The input \code{data} frame with additional columns appended:
     \code{method = "Coloc"}.}
   \item{\code{p_i}}{Size-proportional weight \eqn{p_i = x_k / \sum_h x_k},
     computed within each stratum when \code{strata} is provided. Returned for
-    \code{method = "Pareto"} or \code{"Poisson"}.}
-  \item{\code{pi_i}}{Inclusion probability \eqn{\pi_i = n\_sample \times p_i},
-    computed within each stratum when \code{strata} is provided. Returned for
-    \code{method = "Pareto"} only.}
+    \code{method = "Poisson"}.}
+  \item{\code{pi_i}}{Inclusion probability proportional to size, from
+    \code{TeachingSampling::PikPPS(n_sample, size_var)} and rounded to 5
+    decimals; computed within each stratum when \code{strata} is provided.
+    Returned for \code{method = "Pareto"} only.}
   \item{\code{Xi_Pareto}}{Pareto coordination score
     \eqn{\xi_i^{par} = (\xi_i^P/(1-\xi_i^P)) / (\pi_i/(1-\pi_i))}.
     Returned for \code{method = "Pareto"}.}
@@ -76,14 +79,21 @@ variables. The type of random number computed depends on the \code{method} argum
   \item \strong{MAS}: only the permanent random number \eqn{\xi_i^P}.
   \item \strong{Coloc}: permanent and colocated random numbers.
   \item \strong{Pareto}: permanent random number, inclusion probability
-    \eqn{\pi_i = n\_sample \times p_i}, and Pareto score
+    \eqn{\pi_i} proportional to size, computed with
+    \code{\link[TeachingSampling]{PikPPS}}, and Pareto score
     \eqn{\xi_i^{par} = (\xi_i^P / (1 - \xi_i^P)) / (\pi_i / (1 - \pi_i))}.
-    Requires \code{size_var} and \code{n_sample}. Note that \eqn{\pi_i < 1} must
-    hold for all units.
+    Requires \code{size_var} and \code{n_sample}.
   \item \strong{Poisson}: permanent random number and Poisson sequential
     score \eqn{\xi_i^{pps} = \xi_i^P / (N_h \times p_i)},
     where \eqn{p_i = x_k / \sum_h x_k}. Requires \code{size_var} only.
 }
+The inclusion probabilities start from \eqn{\pi_i = n\_sample \times p_i}.
+When some PSU gets \eqn{\pi_i > 1}, \code{PikPPS} sets it to 1 and
+redistributes the rest of the sample among the other PSUs, so that
+\eqn{0 < \pi_i \le 1} and \eqn{\sum \pi_i = n\_sample}. A PSU with
+\eqn{\pi_i = 1} is a forced inclusion: its \eqn{\xi_i^{par}} is 0, so it is
+always among the first \code{n_sample} PSUs when sorting by \code{Xi_Pareto}.
+
 When \code{strata} is supplied, \eqn{p_i}, \eqn{\pi_i}, and the coordination
 scores are computed \strong{within each stratum} independently, so that
 \eqn{\sum_{i \in h} p_i = 1} for each stratum \eqn{h}.
@@ -149,7 +159,8 @@ generate_random_frame(data = frame, id_psu = psu,
                       permanent_random = frame$nap)
 }
 \seealso{
-\code{\link{generate_random}} for a simpler vector-based interface.
+\code{\link{generate_random}} for a simpler vector-based interface;
+  \code{\link[TeachingSampling]{PikPPS}} for the inclusion probabilities.
 }
 \author{
 Hugo Andres Gutierrez Rojas <andres.gutierrez at cepal.org>,

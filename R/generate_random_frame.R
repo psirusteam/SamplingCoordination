@@ -16,14 +16,21 @@
 #'   \item \strong{MAS}: only the permanent random number \eqn{\xi_i^P}.
 #'   \item \strong{Coloc}: permanent and colocated random numbers.
 #'   \item \strong{Pareto}: permanent random number, inclusion probability
-#'     \eqn{\pi_i = n\_sample \times p_i}, and Pareto score
+#'     \eqn{\pi_i} proportional to size, computed with
+#'     \code{\link[TeachingSampling]{PikPPS}}, and Pareto score
 #'     \eqn{\xi_i^{par} = (\xi_i^P / (1 - \xi_i^P)) / (\pi_i / (1 - \pi_i))}.
-#'     Requires \code{size_var} and \code{n_sample}. Note that \eqn{\pi_i < 1} must
-#'     hold for all units.
+#'     Requires \code{size_var} and \code{n_sample}.
 #'   \item \strong{Poisson}: permanent random number and Poisson sequential
 #'     score \eqn{\xi_i^{pps} = \xi_i^P / (N_h \times p_i)},
 #'     where \eqn{p_i = x_k / \sum_h x_k}. Requires \code{size_var} only.
 #' }
+#' The inclusion probabilities start from \eqn{\pi_i = n\_sample \times p_i}.
+#' When some PSU gets \eqn{\pi_i > 1}, \code{PikPPS} sets it to 1 and
+#' redistributes the rest of the sample among the other PSUs, so that
+#' \eqn{0 < \pi_i \le 1} and \eqn{\sum \pi_i = n\_sample}. A PSU with
+#' \eqn{\pi_i = 1} is a forced inclusion: its \eqn{\xi_i^{par}} is 0, so it is
+#' always among the first \code{n_sample} PSUs when sorting by \code{Xi_Pareto}.
+#'
 #' When \code{strata} is supplied, \eqn{p_i}, \eqn{\pi_i}, and the coordination
 #' scores are computed \strong{within each stratum} independently, so that
 #' \eqn{\sum_{i \in h} p_i = 1} for each stratum \eqn{h}.
@@ -44,10 +51,11 @@
 #'     \code{method = "Coloc"}.}
 #'   \item{\code{p_i}}{Size-proportional weight \eqn{p_i = x_k / \sum_h x_k},
 #'     computed within each stratum when \code{strata} is provided. Returned for
-#'     \code{method = "Pareto"} or \code{"Poisson"}.}
-#'   \item{\code{pi_i}}{Inclusion probability \eqn{\pi_i = n\_sample \times p_i},
-#'     computed within each stratum when \code{strata} is provided. Returned for
-#'     \code{method = "Pareto"} only.}
+#'     \code{method = "Poisson"}.}
+#'   \item{\code{pi_i}}{Inclusion probability proportional to size, from
+#'     \code{TeachingSampling::PikPPS(n_sample, size_var)} and rounded to 5
+#'     decimals; computed within each stratum when \code{strata} is provided.
+#'     Returned for \code{method = "Pareto"} only.}
 #'   \item{\code{Xi_Pareto}}{Pareto coordination score
 #'     \eqn{\xi_i^{par} = (\xi_i^P/(1-\xi_i^P)) / (\pi_i/(1-\pi_i))}.
 #'     Returned for \code{method = "Pareto"}.}
@@ -88,9 +96,11 @@
 #' @param size_var Unquoted name of the numeric column in \code{data} with the
 #'   PSU size measure (e.g., number of dwellings or households). Required
 #'   when \code{method = "Pareto"} or \code{method = "Poisson"}.
-#' @param n_sample Integer. Number of PSUs to be selected. Required when
-#'   \code{method = "Pareto"} to compute \eqn{\pi_i = n\_sample \times p_i}.
-#'   Must satisfy \eqn{n\_sample \times p_i < 1} for all units.
+#' @param n_sample Integer. Number of PSUs to be selected (in each stratum
+#'   when \code{strata} is supplied). Required when \code{method = "Pareto"}
+#'   to compute the inclusion probabilities with
+#'   \code{\link[TeachingSampling]{PikPPS}}. Cannot be larger than the number
+#'   of PSUs in the frame or in any stratum.
 #' @param strata Unquoted name of the stratum variable in \code{data}. When
 #'   supplied, \eqn{p_i} and all derived scores are computed independently
 #'   within each stratum. If \code{NULL} (default), computations are performed
@@ -103,7 +113,8 @@
 #'   from a previous survey frame). The values are always returned in the output
 #'   as \code{Xi_Perman}.
 #'
-#' @seealso \code{\link{generate_random}} for a simpler vector-based interface.
+#' @seealso \code{\link{generate_random}} for a simpler vector-based interface;
+#'   \code{\link[TeachingSampling]{PikPPS}} for the inclusion probabilities.
 #'
 #' @examples
 #' frame <- data.frame(
@@ -230,17 +241,30 @@ generate_random_frame <- function(data,
     }
     
     if (method == "Pareto") {
-      # pi_i = n_sample * p_i, computed within each stratum when `strata` is
-      # supplied (p_i already sums to 1 inside each stratum).
+      if (any(data$.N_h < n_sample))
+        stop("`n_sample` is larger than the number of PSUs",
+             if (!is.null(strata_expr)) " in some stratum" else " in `data`",
+             ".", call. = FALSE)
+      # Inclusion probabilities proportional to size with
+      # TeachingSampling::PikPPS: PSUs with n_sample * p_i > 1 get pi_i = 1
+      # and the rest of the sample is redistributed. Computed within each
+      # stratum when `strata` is supplied.
+      if (!is.null(strata_expr)) {
+        data <- data %>%
+          group_by(.data[[strata_nm]]) %>%
+          mutate(pi_i = round(TeachingSampling::PikPPS(n_sample, .size_var), 5)) %>%
+          ungroup()
+      } else {
+        data <- data %>%
+          mutate(pi_i = round(TeachingSampling::PikPPS(n_sample, .size_var), 5))
+      }
       data <- data %>%
-        mutate(
-          pi_i      = round(n_sample * p_i, 5),
-          Xi_Pareto = (Xi_Perman / (1 - Xi_Perman)) / (pi_i / (1 - pi_i))
-        ) %>%
+        mutate(Xi_Pareto = (Xi_Perman / (1 - Xi_Perman)) / (pi_i / (1 - pi_i))) %>%
         select(-p_i)
-      if (any(data$pi_i >= 1, na.rm = TRUE))
-        warning("Some units have pi_i >= 1. Consider reducing n_sample or ",
-                "reviewing size_var values.", call. = FALSE)
+      n_forced <- sum(data$pi_i >= 1, na.rm = TRUE)
+      if (n_forced > 0)
+        message(n_forced, " PSU(s) have pi_i = 1 (forced inclusion); ",
+                "their Xi_Pareto is 0.")
     }
     
     if (method == "Poisson") {
